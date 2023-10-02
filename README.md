@@ -22,7 +22,7 @@ Cleanster is a Cloudflare node application designed to filter and moderate conte
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/your-repo/cleanster.git
+   git clone https://github.com/planetary-social/cleanster.git
    cd cleanster
    ```
 
@@ -62,7 +62,7 @@ Cleanster is a Cloudflare node application designed to filter and moderate conte
 
 ## Support
 
-If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/your-repo/cleanster/issues) or contact our support team at support@email.com.
+If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/your-repo/cleanster/issues) or contact our support team at support@nos.social.
 
 ## Contributing
 
