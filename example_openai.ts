@@ -1,20 +1,20 @@
-#example bot using cloudflare and openai moderation
+//example bot using cloudflare and openai moderation
 
-const OPENAI_MODERATION_URL = "https://api.openai.com/v1/moderations";
-const OPENAI_API_KEY = "sk-XXXXXXXX";
+const OPENAI_MODERATION_URL = 'https://api.openai.com/v1/moderations';
+const OPENAI_API_KEY = 'sk-XXXXXXXX';
 
 const headers = {
-  "Content-Type": "application/json",
-  "Authorization": `Bearer ${OPENAI_API_KEY}`
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${OPENAI_API_KEY}`,
 };
 
-addEventListener("fetch", event => {
+addEventListener('fetch', (event) => {
   const { request } = event;
   const { url } = request;
 
-  if (url.endsWith("/event")) {
+  if (url.endsWith('/event')) {
     return event.respondWith(handleRestEvent(request));
-  } else if (url.endsWith("/ws")) {
+  } else if (url.endsWith('/ws')) {
     return event.respondWith(handleWsEvent(request));
   } else {
     return event.respondWith(handleRoot(request));
@@ -22,13 +22,17 @@ addEventListener("fetch", event => {
 });
 
 async function handleRoot(request: Request) {
-  if (request.method === "POST") {
+  if (request.method === 'POST') {
     const formData = await request.formData();
-    const content = formData.get("content");
+    const content = formData.get('content');
     const result = await moderate(content as string);
-    return new Response(renderResult(result), { headers: { "Content-Type": "text/html" } });
+    return new Response(renderResult(result), {
+      headers: { 'Content-Type': 'text/html' },
+    });
   } else {
-    return new Response(renderForm(), { headers: { "Content-Type": "text/html" } });
+    return new Response(renderForm(), {
+      headers: { 'Content-Type': 'text/html' },
+    });
   }
 }
 
@@ -66,14 +70,16 @@ function renderResult(result: any) {
 }
 
 async function handleRestEvent(request: Request) {
-  if (request.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+  if (request.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 });
   }
 
   const body = await request.text();
   const event = JSON.parse(body);
   const result = await moderate(event.content);
-  return new Response(JSON.stringify(result), { headers: { "Content-Type": "application/json" } });
+  return new Response(JSON.stringify(result), {
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
 async function handleWsEvent(request: Request) {
@@ -81,28 +87,30 @@ async function handleWsEvent(request: Request) {
   const ws = new WebSocketPair();
   ws[0].accept();
 
-  ws[0].addEventListener("message", async ({ data }) => {
+  ws[0].addEventListener('message', async ({ data }) => {
     const event = JSON.parse(data);
     const result = await moderate(event.content);
     ws[0].send(JSON.stringify(result));
   });
 
-  ws[0].addEventListener("close", (event) => {
+  ws[0].addEventListener('close', (event) => {
     ws[1].close(event.code, event.reason);
   });
 
-  return new Response(readable, { headers: { "Content-Type": "application/json" } });
+  return new Response(readable, {
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
 async function moderate(content: string) {
   const body = JSON.stringify({ input: content });
   const response = await fetch(OPENAI_MODERATION_URL, {
-    method: "POST",
+    method: 'POST',
     headers: headers,
-    body: body
+    body: body,
   });
 
   const data = await response.json();
-  console.log("Moderation Response:", JSON.stringify(data, null, 2)); // added debugging information
+  console.log('Moderation Response:', JSON.stringify(data, null, 2)); // added debugging information
   return data;
 }

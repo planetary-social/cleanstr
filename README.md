@@ -1,6 +1,6 @@
 # Cleanster - Nostr Content Moderation with OpenAI
 
-Cleanster is a Cloudflare node application designed to filter and moderate content from Nostr using OpenAI's moderation service. With the surge in user-generated content, maintaining the quality and safety of shared data is paramount. Cleanster seamlessly takes in a pubsub feed of Nostr content, checks it, and generates Nostr events tagging the results.
+Cleanster is a Google Cloud Function node application designed to filter and moderate content from Nostr using OpenAI's moderation service. With the surge in user-generated content, maintaining the quality and safety of shared data is paramount. Cleanster seamlessly takes in a pubsub feed of Nostr content, checks it, and generates Nostr events tagging the results.
 
 ## Table of Contents
 
@@ -13,8 +13,8 @@ Cleanster is a Cloudflare node application designed to filter and moderate conte
 
 ## Requirements
 
-- Cloudflare account
-- Node.js v14+
+- Google Cloud Account
+- Node.js v16+
 - OpenAI API Key
 
 ## Installation
@@ -32,13 +32,13 @@ Cleanster is a Cloudflare node application designed to filter and moderate conte
    npm install
    ```
 
-3. **Setup Configuration**
+3. **Setup Configuration NOT IMPLEMENTED**
 
    Rename `config.sample.json` to `config.json` and populate it with your OpenAI API key and any other necessary configurations.
 
 ## Usage
 
-1. **Run Locally**
+1. **Run Locally NOT IMPLEMENTED**
 
    Start the application locally using:
 
@@ -48,9 +48,9 @@ Cleanster is a Cloudflare node application designed to filter and moderate conte
 
    This will start the node server and begin processing the Nostr pubsub feed through OpenAI's moderation service.
 
-2. **Deploy to Cloudflare**
+2. **Deploy to Google Cloud**
 
-   Ensure you have the Cloudflare CLI set up and configured with your account credentials. Then:
+   Ensure you have the gcloud CLI set up and configured with your account credentials. Then:
 
    ```bash
    npm run deploy
@@ -82,5 +82,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 Thank you for using or considering Cleanster, a powerful tool in ensuring a safer Nostr content experience.
-
-Remember to replace placeholders like `https://github.com/your-repo/cleanster.git` and `support@email.com` with your actual repository link and support email address respectively.
