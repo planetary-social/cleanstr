@@ -1,7 +1,6 @@
-const supertest = require('supertest');
-const functionsFramework = require('@google-cloud/functions-framework/testing');
-
-require('../index');
+import supertest from 'supertest';
+import * as functionsFramework from '@google-cloud/functions-framework/testing';
+import '../index.js';
 
 const nostrEvent = {
   id: '4376c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a65',
@@ -17,12 +16,12 @@ const nostrEvent = {
   sig: '908a15e46fb4d8675bab026fc230a0e3542bfade63da02d542fb78b2a8513fcd0092619a2c8c1221e581946e0191f2af505dfdf8657a414dbca329186f009262',
 };
 
-describe('functions_cloudevent_pubsub', () => {
-  it('should process a CloudEvent', async () => {
+describe('Endpoint', () => {
+  it('should process a CloudEvent containing a valid nostr Event', async () => {
     const cloudEventData = { data: { message: {} } };
 
     cloudEventData.data.message = {
-      data: Buffer.from(JSON.stringify(nostrEvent)).toString('base64'),
+      data: Buffer.from(JSON.stringify({ ...nostrEvent })).toString('base64'),
     };
 
     const server = functionsFramework.getTestServer('nostrEventsPubSub');

@@ -1,5 +1,10 @@
-const { getFunction } = require('@google-cloud/functions-framework/testing');
-require('..');
+import { getFunction } from '@google-cloud/functions-framework/testing';
+import '../index.js';
+
+import assert from 'assert';
+import { v4 as uuid } from 'uuid';
+import sinon from 'sinon';
+import lib from '../src/lib.js';
 
 const nostrEvent = {
   id: '4376c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a65',
@@ -15,36 +20,91 @@ const nostrEvent = {
   sig: '908a15e46fb4d8675bab026fc230a0e3542bfade63da02d542fb78b2a8513fcd0092619a2c8c1221e581946e0191f2af505dfdf8657a414dbca329186f009262',
 };
 
-describe('functions_cloudevent_pubsub', () => {
-  const assert = require('assert');
-  const uuid = require('uuid');
-  const sinon = require('sinon');
+const flaggedNostrEvent = {
+  id: 'd6548d08b8bc5dff67004ca072d717d95537ee66c2321f4adc40f0149de93188',
+  pubkey: 'e9f36e738e6c073068f07b1851b406fe573549507ddc3c2c007b908ee23bbd52',
+  created_at: 1696433268,
+  kind: 1,
+  content: 'I want to kill you John Doe and fuck your corpse!',
+  tags: [],
+  sig: '9e158221df2d0e09bbdced2910d9d06a1a2838d3281e761f019bb4ca227afdf263a0464e74252f002ca7cd5f0cff6bf84531362a778868786b8a4f9e6a7250b0',
+};
 
-  const stubConsole = function () {
+describe('Function', () => {
+  beforeEach(function () {
+    sinon.stub(lib, 'publishModerationResult');
     sinon.stub(console, 'error');
     sinon.stub(console, 'log');
-  };
+  });
 
-  const restoreConsole = function () {
+  afterEach(function () {
     console.log.restore();
     console.error.restore();
-  };
+    lib.publishModerationResult.restore();
+  });
 
-  beforeEach(stubConsole);
-  afterEach(restoreConsole);
-
-  it('should print the id of the nostr event', () => {
+  it('should do nothing for a valid event that is not flagged', async () => {
     const cloudEvent = { data: { message: {} } };
     cloudEvent.data.message = {
       data: Buffer.from(JSON.stringify(nostrEvent)).toString('base64'),
     };
 
     const nostrEventsPubSub = getFunction('nostrEventsPubSub');
-    nostrEventsPubSub(cloudEvent);
-    assert.ok(
-      console.log.calledWith(
-        'Nostr Event Id: 4376c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a65'
-      )
-    );
+    await nostrEventsPubSub(cloudEvent);
+
+    assert.ok(lib.publishModerationResult.notCalled);
+  });
+
+  it('should publish a moderation event for a valid event that is flagged', async () => {
+    const cloudEvent = { data: { message: {} } };
+    cloudEvent.data.message = {
+      data: Buffer.from(JSON.stringify(flaggedNostrEvent)).toString('base64'),
+    };
+
+    const nostrEventsPubSub = getFunction('nostrEventsPubSub');
+    await nostrEventsPubSub(cloudEvent);
+
+    assert.ok(lib.publishModerationResult.called);
+  });
+
+  it('should detect and invalid event', async () => {
+    const cloudEvent = { data: { message: {} } };
+    const nEvent = { ...nostrEvent };
+    delete nEvent.kind;
+    cloudEvent.data.message = {
+      data: Buffer.from(JSON.stringify(nEvent)).toString('base64'),
+    };
+
+    const nostrEventsPubSub = getFunction('nostrEventsPubSub');
+    await nostrEventsPubSub(cloudEvent);
+
+    assert.ok(console.error.calledWith('Invalid Nostr Event'));
+    assert.ok(lib.publishModerationResult.notCalled);
+  });
+
+  it('should detect and invalid signature', async () => {
+    const cloudEvent = { data: { message: {} } };
+    const nEvent = { ...nostrEvent };
+    nEvent.id =
+      '1111c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a65';
+    cloudEvent.data.message = {
+      data: Buffer.from(JSON.stringify(nEvent)).toString('base64'),
+    };
+
+    const nostrEventsPubSub = getFunction('nostrEventsPubSub');
+    await nostrEventsPubSub(cloudEvent);
+
+    assert.ok(console.error.calledWith('Invalid Nostr Event Signature'));
+    assert.ok(lib.publishModerationResult.notCalled);
   });
 });
+
+// Helper function to log all call arguments
+function logAllCallArguments(stub) {
+  for (let i = 0; i < stub.callCount; i++) {
+    const callArgs = stub.getCall(i).args;
+    process.stdout.write(
+      `Call ${i + 1} arguments: ${JSON.stringify(callArgs)}\n`
+    );
+  }
+}
