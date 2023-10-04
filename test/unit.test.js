@@ -2,9 +2,9 @@ import { getFunction } from '@google-cloud/functions-framework/testing';
 import '../index.js';
 
 import assert from 'assert';
-import { v4 as uuid } from 'uuid';
 import sinon from 'sinon';
 import lib from '../src/lib.js';
+import { NDKEvent } from '@nostr-dev-kit/ndk';
 
 const nostrEvent = {
   id: '4376c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a65',
@@ -32,18 +32,19 @@ const flaggedNostrEvent = {
 
 describe('Function', () => {
   beforeEach(function () {
-    sinon.stub(lib, 'publishModerationResult');
     sinon.stub(console, 'error');
     sinon.stub(console, 'log');
+    sinon.stub(NDKEvent.prototype, 'publish').returns(Promise.resolve());
   });
 
   afterEach(function () {
+    NDKEvent.prototype.publish.restore();
     console.log.restore();
     console.error.restore();
-    lib.publishModerationResult.restore();
   });
 
   it('should do nothing for a valid event that is not flagged', async () => {
+    sinon.stub(lib, 'publishModerationResult');
     const cloudEvent = { data: { message: {} } };
     cloudEvent.data.message = {
       data: Buffer.from(JSON.stringify(nostrEvent)).toString('base64'),
@@ -53,6 +54,7 @@ describe('Function', () => {
     await nostrEventsPubSub(cloudEvent);
 
     assert.ok(lib.publishModerationResult.notCalled);
+    lib.publishModerationResult.restore();
   });
 
   it('should publish a moderation event for a valid event that is flagged', async () => {
@@ -64,7 +66,7 @@ describe('Function', () => {
     const nostrEventsPubSub = getFunction('nostrEventsPubSub');
     await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(lib.publishModerationResult.called);
+    assert.ok(NDKEvent.prototype.publish.called);
   });
 
   it('should detect and invalid event', async () => {
@@ -79,7 +81,7 @@ describe('Function', () => {
     await nostrEventsPubSub(cloudEvent);
 
     assert.ok(console.error.calledWith('Invalid Nostr Event'));
-    assert.ok(lib.publishModerationResult.notCalled);
+    assert.ok(NDKEvent.prototype.publish.notCalled);
   });
 
   it('should detect and invalid signature', async () => {
@@ -95,7 +97,7 @@ describe('Function', () => {
     await nostrEventsPubSub(cloudEvent);
 
     assert.ok(console.error.calledWith('Invalid Nostr Event Signature'));
-    assert.ok(lib.publishModerationResult.notCalled);
+    assert.ok(NDKEvent.prototype.publish.notCalled);
   });
 });
 

@@ -1,6 +1,5 @@
 'use strict';
 
-import NDK from '@nostr-dev-kit/ndk';
 import OpenAI from 'openai';
 import { validateEvent, verifySignature } from 'nostr-tools';
 import lib from './src/lib.js';
