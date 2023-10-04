@@ -17,7 +17,9 @@
     "sendTestEvent": "curl -m 70 -X POST https://us-central1-pub-verse-app.cloudfunctions.net/nodejs-moderator-function -H \"Authorization: bearer $(gcloud auth print-identity-token)\" -H \"Content-Type: application/json\" -H \"ce-id: 1234567890\" -H \"ce-specversion: 1.0\" -H \"ce-type: google.cloud.pubsub.topic.v1.messagePublished\" -H \"ce-time: 2020-08-08T00:11:44.895529672Z\" -H \"ce-source: //pubsub.googleapis.com/projects/pub-verse-app/topics/nostr-events\" -d '{  \"message\": {\"data\": \"eyJpZCI6IjQzNzZjNjVkMmYyMzJhZmJlOWI4ODJhMzViYWE0ZjZmZTg2NjdjNGU2ODQ3NDlhZjU2NWY5ODE4MzNlZDZhNjUiLCJwdWJrZXkiOiI2ZTQ2ODQyMmRmYjc0YTU3Mzg3MDJhODgyM2I5YjI4MTY4YWJhYjg2NTVmYWFjYjY4NTNjZDBlZTE1ZGVlZTkzIiwiY3JlYXRlZF9hdCI6MTY3MzM0NzMzNywia2luZCI6MSwiY29udGVudCI6IldhbGxlZCBnYXJkZW5zIGJlY2FtZSBwcmlzb25zLCBhbmQgbm9zdHIgaXMgdGhlIGZpcnN0IHN0ZXAgdG93YXJkcyB0ZWFyaW5nIGRvd24gdGhlIHByaXNvbiB3YWxscy4iLCJ0YWdzIjpbWyJlIiwiM2RhOTc5NDQ4ZDliYTI2Mzg2NGM0ZDZmMTQ5ODRjNDIzYTM4MzgzNjRlYzI1NWYwM2M3OTA0YjFhZTc3ZjIwNiJdLFsicCIsImJmMjM3NmUxN2JhNGVjMjY5ZDEwZmNjOTk2YTQ3NGI0NTExNTJiZTkwMzFmYTQ4ZTc0NTUzZGRlNTUyNmJjZSJdXSwic2lnIjoiOTA4YTE1ZTQ2ZmI0ZDg2NzViYWIwMjZmYzIzMDBlMzU0MmJmYWRlNjNkYTAyZDU0MmZiNzhiMmE4NTEzZmNkMDA5MjYxOWEyYzhjMTIyMWU1ODE5NDZlMDE5MWYyYWY1MDVkZmRmODY1N2E0MTRkYmNhMzI5MTg2ZjAwOTI2MiJ9\"}}'"
   },
   "dependencies": {
-    "@google-cloud/functions-framework": "^3.0.0"
+    "@google-cloud/functions-framework": "^3.0.0",
+    "@nostr-dev-kit/ndk": "^1.3.1",
+    "openai": "^4.11.1"
   },
   "devDependencies": {
     "c8": "^8.0.0",
