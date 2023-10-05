@@ -19,6 +19,7 @@ if (!process.env.NOSTR_PRIVATE_KEY) {
   throw new Error('NOSTR_PRIVATE_KEY environment variable is required');
 }
 const signer = new NDKPrivateKeySigner(process.env.NOSTR_PRIVATE_KEY);
+const userPromise = signer.user();
 
 // Keep this initialization in the global module scope so it can be reused
 // across function invocations
@@ -58,6 +59,7 @@ async function publishModerationResult(moderatedNostrEvent, moderation) {
   // Ensure we are already connected and it was done once in the module scope
   // during cold start
   await connectedPromise;
+  const user = await userPromise;
 
   const moderationEvent = new NDKEvent(ndk);
 
@@ -69,7 +71,11 @@ async function publishModerationResult(moderatedNostrEvent, moderation) {
   await moderationEvent.sign(ndk.signer);
   await moderationEvent.publish();
 
-  console.log('Published moderation event: ', JSON.stringify(moderationEvent));
+  console.log(
+    `Published moderation event ${moderationEvent.id} on ${user.npub}`
+  );
+
+  return moderationEvent;
 }
 
 function setTags(moderationEvent, moderatedNostrEvent, moderation) {

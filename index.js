@@ -36,13 +36,13 @@ functions.cloudEvent('nostrEventsPubSub', async (cloudEvent) => {
       return;
     }
 
-    await lib.publishModerationResult(event, moderation);
-
-    console.log(
-      `Nostr Event ${event.id} was flagged. Published moderation Nostr event`
+    const moderationEvent = await lib.publishModerationResult(
+      event,
+      moderation
     );
   } catch (err) {
     // For the moment log every error to the console and let the function finish
+    // Well handle retries
     console.error(err);
   }
 });
