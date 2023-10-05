@@ -7,6 +7,8 @@ import lib from './src/lib.js';
 import functions from '@google-cloud/functions-framework';
 
 // Assumes OPENAI_API_KEY has been set in the environment
+// Keep this initialization in the global module scope so it can be reused
+// across function invocations
 const openai = new OpenAI();
 
 functions.cloudEvent('nostrEventsPubSub', async (cloudEvent) => {
