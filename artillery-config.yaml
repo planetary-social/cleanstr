@@ -1,0 +1,23 @@
+config:
+  target: 'https://us-central1-pub-verse-app.cloudfunctions.net/nodejs-moderator-function'
+  phases:
+    - duration: 120  # Set the duration of the test in seconds
+      arrivalRate: 300 # Set the number of new connections per second check OpenAI Moderation limit of the account we use to ensure this is correct
+      name: "Initial Load Test"
+  defaults:
+    headers:
+      Authorization: "bearer GCLOUD_IDENTITY_TOKEN"
+      Content-Type: "application/json"
+      ce-id: "1234567890"
+      ce-specversion: "1.0"
+      ce-type: "google.cloud.pubsub.topic.v1.messagePublished"
+      ce-time: "2020-08-08T00:11:44.895529672Z"
+      ce-source: "//pubsub.googleapis.com/projects/pub-verse-app/topics/nostr-events"
+
+scenarios:
+  - flow:
+      - post:
+          url: '/'
+          json:
+            message:
+              data: "eyJjb250ZW50IjoiSSB3YW50IHRvIGtpbGwgeW91IEpvaG4gRG9lIGFuZCBmdWNrIHlvdXIgY29ycHNlIiwiY3JlYXRlZF9hdCI6MTY5NjQzNzM2OSwiaWQiOiJjZGIxM2MzZGUyYTBmODM4ZTdhZDkzZjNkODcxOWM3MjIwNzA2MTFkNWU1Y2Q4NjBkNTEwNGNiMjFiZDNlNjBiIiwia2luZCI6MSwicHVia2V5IjoiZTlmMzZlNzM4ZTZjMDczMDY4ZjA3YjE4NTFiNDA2ZmU1NzM1NDk1MDdkZGMzYzJjMDA3YjkwOGVlMjNiYmQ1MiIsInNpZyI6ImUyOWRiNWUzZTI1NzViMmIzYzVjMTQ4ZDA2Y2VhZDg1MmRmNTVlNmIwMDQwNTE4NDVkZmUzZmE1MmU0MzM4NTY0NTViNDA5YzU5MGY1NDNlMDk0ZWY3ZTc5NmFlODliOWE5NjI4NGE0YzdhYmJiOWJiMWM0Mjk5NjYwMTdmNWFlIiwidGFncyI6W119Cg=="
