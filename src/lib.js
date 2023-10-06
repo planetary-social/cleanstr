@@ -1,6 +1,10 @@
 import NDK, { NDKEvent, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { WebSocket } from 'ws';
 
+if (!process.env.NOSTR_PRIVATE_KEY) {
+  throw new Error('NOSTR_PRIVATE_KEY environment variable is required');
+}
+
 // Hack to be able to have a global WebSocket object in Google Cloud Functions
 global.WebSocket = WebSocket;
 
@@ -15,9 +19,6 @@ const RELAYS = [
   'wss://rss.nos.social',
 ];
 
-if (!process.env.NOSTR_PRIVATE_KEY) {
-  throw new Error('NOSTR_PRIVATE_KEY environment variable is required');
-}
 const signer = new NDKPrivateKeySigner(process.env.NOSTR_PRIVATE_KEY);
 const userPromise = signer.user();
 
@@ -55,7 +56,7 @@ const MODERATION_CATEGORIES = {
 
 // Creates a NIP-32 event flagging a Nostr event.
 // See: https://github.com/nostr-protocol/nips/blob/master/32.md
-async function publishModerationResult(moderatedNostrEvent, moderation) {
+async function publishModeration(moderatedNostrEvent, moderation) {
   // Ensure we are already connected and it was done once in the module scope
   // during cold start
   await connectedPromise;
@@ -111,7 +112,12 @@ function getContent(moderation) {
     .trim();
 }
 
+async function waitMillis(millis) {
+  await new Promise((resolve) => setTimeout(resolve, millis));
+}
+
 // This trick is needed so that we can stub the function in our tests
 export default {
-  publishModerationResult,
+  publishModeration,
+  waitMillis,
 };

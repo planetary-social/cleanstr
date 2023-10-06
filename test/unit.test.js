@@ -1,10 +1,11 @@
 import { getFunction } from '@google-cloud/functions-framework/testing';
-import '../index.js';
 
 import assert from 'assert';
 import sinon from 'sinon';
 import lib from '../src/lib.js';
 import { NDKEvent } from '@nostr-dev-kit/ndk';
+import OpenAI from 'openai';
+import '../index.js';
 
 const nostrEvent = {
   id: '4376c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a65',
@@ -32,19 +33,17 @@ const flaggedNostrEvent = {
 
 describe('Function', () => {
   beforeEach(function () {
-    sinon.stub(console, 'error');
-    sinon.stub(console, 'log');
+    sinon.spy(console, 'error');
+    sinon.spy(console, 'log');
     sinon.stub(NDKEvent.prototype, 'publish').returns(Promise.resolve());
   });
 
   afterEach(function () {
-    NDKEvent.prototype.publish.restore();
-    console.log.restore();
-    console.error.restore();
+    sinon.restore();
   });
 
   it('should do nothing for a valid event that is not flagged', async () => {
-    sinon.stub(lib, 'publishModerationResult');
+    sinon.stub(lib, 'publishModeration');
     const cloudEvent = { data: { message: {} } };
     cloudEvent.data.message = {
       data: Buffer.from(JSON.stringify(nostrEvent)).toString('base64'),
@@ -53,8 +52,8 @@ describe('Function', () => {
     const nostrEventsPubSub = getFunction('nostrEventsPubSub');
     await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(lib.publishModerationResult.notCalled);
-    lib.publishModerationResult.restore();
+    assert.ok(lib.publishModeration.notCalled);
+    lib.publishModeration.restore();
   });
 
   it('should publish a moderation event for a valid event that is flagged', async () => {
@@ -62,11 +61,13 @@ describe('Function', () => {
     cloudEvent.data.message = {
       data: Buffer.from(JSON.stringify(flaggedNostrEvent)).toString('base64'),
     };
-
+    const waitMillisStub = sinon.stub(lib, 'waitMillis');
     const nostrEventsPubSub = getFunction('nostrEventsPubSub');
+
     await nostrEventsPubSub(cloudEvent);
 
     assert.ok(NDKEvent.prototype.publish.called);
+    sinon.assert.notCalled(waitMillisStub);
   });
 
   it('should detect and invalid event', async () => {
@@ -99,9 +100,46 @@ describe('Function', () => {
     assert.ok(console.error.calledWith('Invalid Nostr Event Signature'));
     assert.ok(NDKEvent.prototype.publish.notCalled);
   });
+
+  it('should add jitter pause after a rate limit error', async () => {
+    const cloudEvent = { data: { message: {} } };
+    const nEvent = { ...nostrEvent };
+    cloudEvent.data.message = {
+      data: Buffer.from(JSON.stringify(nEvent)).toString('base64'),
+    };
+
+    const nostrEventsPubSub = getFunction('nostrEventsPubSub');
+    const createModerationStub = sinon
+      .stub(OpenAI.Moderations.prototype, 'create')
+      .rejects({
+        response: {
+          status: 429,
+        },
+      });
+    const waitMillisStub = sinon.stub(lib, 'waitMillis');
+
+    // Ensure the rate limit error is still thrown after being handled so that
+    // we still trigger the pubsub topic subscription retry policy
+    await assert.rejects(nostrEventsPubSub(cloudEvent), (error) => {
+      return (
+        (error.response && error.response.status === 429) ||
+        new assert.AssertionError({ message: 'Expected a 429 status code' })
+      );
+    });
+
+    assert.ok(NDKEvent.prototype.publish.notCalled);
+
+    sinon.assert.calledWithMatch(
+      waitMillisStub,
+      sinon.match(
+        (number) => typeof number === 'number' && number > 0,
+        'positive number'
+      )
+    );
+  });
 });
 
-// Helper function to log all call arguments
+// Helper function to log all stub call arguments during debugging
 function logAllCallArguments(stub) {
   for (let i = 0; i < stub.callCount; i++) {
     const callArgs = stub.getCall(i).args;
