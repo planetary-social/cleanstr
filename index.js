@@ -6,7 +6,6 @@ import { validateEvent, verifySignature } from 'nostr-tools';
 // We use lib instead of explicit functions so that we can stub them in our tests
 import lib from './src/lib.js';
 
-let startTime;
 const FUNCTION_TIMEOUT_MS = 60000;
 const RATE_LIMIT_ERROR_CODE = 429;
 
@@ -16,7 +15,7 @@ const RATE_LIMIT_ERROR_CODE = 429;
 const openai = new OpenAI();
 
 functions.cloudEvent('nostrEventsPubSub', async (cloudEvent) => {
-  startTime = Date.now();
+  const startTime = Date.now();
 
   try {
     const event = getVerifiedEvent(cloudEvent.data.message.data);
@@ -36,7 +35,7 @@ functions.cloudEvent('nostrEventsPubSub', async (cloudEvent) => {
   } catch (error) {
     if (error?.response?.status === RATE_LIMIT_ERROR_CODE) {
       console.error('Rate limit error. Adding random pause');
-      await randomPause();
+      await randomPause(startTime);
       throw error;
     }
   }
@@ -71,7 +70,7 @@ async function getModeration(event) {
 // Random pause within the window of half of the remaining available time before
 // hitting timeout.
 // https://platform.openai.com/docs/guides/rate-limits/error-mitigation
-async function randomPause() {
+async function randomPause(startTime) {
   const elapsedMs = Date.now() - startTime;
   const remainingMs = FUNCTION_TIMEOUT_MS - elapsedMs;
   const halfOfRemainingTime = remainingMs / 2;
