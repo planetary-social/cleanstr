@@ -12,33 +12,36 @@ const RATE_LIMIT_ERROR_CODE = 429;
 // Assumes OPENAI_API_KEY has been set in the environment
 // Keep this initialization in the global module scope so it can be reused
 // across function invocations
+// TODO: Pool of api keys/clients
 const openai = new OpenAI();
 
 functions.cloudEvent('nostrEventsPubSub', async (cloudEvent) => {
-  const startTime = Date.now();
+  const event = getVerifiedEvent(cloudEvent.data.message.data);
 
-  try {
-    const event = getVerifiedEvent(cloudEvent.data.message.data);
-
-    if (!event) {
-      return;
-    }
-
-    const moderation = await getModeration(event);
-
-    if (!moderation) {
-      console.log(`Nostr Event ${event.id} Passed Moderation. Skipping`);
-      return;
-    }
-
-    await lib.publishModeration(event, moderation);
-  } catch (error) {
-    if (error?.response?.status === RATE_LIMIT_ERROR_CODE) {
-      console.error('Rate limit error. Adding random pause');
-      await randomPause(startTime);
-      throw error;
-    }
+  if (!event) {
+    return;
   }
+
+  await lib.processIfNotDuplicate(event, async (event) => {
+    const startTime = Date.now();
+
+    try {
+      const moderation = await getModeration(event);
+
+      if (!moderation) {
+        console.log(`Nostr Event ${event.id} passed moderation. Skipping`);
+        return;
+      }
+
+      await lib.publishModeration(event, moderation);
+    } catch (error) {
+      if (error?.response?.status === RATE_LIMIT_ERROR_CODE) {
+        console.error('Rate limit error. Adding random pause');
+        await randomPause(startTime);
+        throw error;
+      }
+    }
+  });
 });
 
 function getVerifiedEvent(data) {

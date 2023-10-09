@@ -1,5 +1,6 @@
 import supertest from 'supertest';
 import * as functionsFramework from '@google-cloud/functions-framework/testing';
+import { assertDataStoreEmulatorIsRunning, resetDataStore } from './utils.js';
 import '../index.js';
 
 const flaggedNostrEvent = {
@@ -12,7 +13,17 @@ const flaggedNostrEvent = {
   sig: '9e158221df2d0e09bbdced2910d9d06a1a2838d3281e761f019bb4ca227afdf263a0464e74252f002ca7cd5f0cff6bf84531362a778868786b8a4f9e6a7250b0',
 };
 
-describe('Endpoint', () => {
+describe('Endpoint', function () {
+  this.timeout(5000);
+
+  before(async function () {
+    await assertDataStoreEmulatorIsRunning();
+  });
+
+  beforeEach(async function () {
+    await resetDataStore();
+  });
+
   it('should process a CloudEvent containing a valid nostr Event', async () => {
     const cloudEventData = { data: { message: {} } };
 

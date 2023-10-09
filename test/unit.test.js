@@ -1,4 +1,6 @@
 import { getFunction } from '@google-cloud/functions-framework/testing';
+import { Datastore } from '@google-cloud/datastore';
+import { assertDataStoreEmulatorIsRunning, resetDataStore } from './utils.js';
 
 import assert from 'assert';
 import sinon from 'sinon';
@@ -7,6 +9,7 @@ import { NDKEvent } from '@nostr-dev-kit/ndk';
 import OpenAI from 'openai';
 import '../index.js';
 
+const datastore = new Datastore();
 const nostrEvent = {
   id: '4376c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a65',
   pubkey: '6e468422dfb74a5738702a8823b9b28168abab8655faacb6853cd0ee15deee93',
@@ -32,7 +35,13 @@ const flaggedNostrEvent = {
 };
 
 describe('Function', () => {
-  beforeEach(function () {
+  before(async function () {
+    await assertDataStoreEmulatorIsRunning();
+  });
+
+  beforeEach(async function () {
+    await resetDataStore();
+
     sinon.spy(console, 'error');
     sinon.spy(console, 'log');
     sinon.stub(NDKEvent.prototype, 'publish').returns(Promise.resolve());
@@ -138,13 +147,3 @@ describe('Function', () => {
     );
   });
 });
-
-// Helper function to log all stub call arguments during debugging
-function logAllCallArguments(stub) {
-  for (let i = 0; i < stub.callCount; i++) {
-    const callArgs = stub.getCall(i).args;
-    process.stdout.write(
-      `Call ${i + 1} arguments: ${JSON.stringify(callArgs)}\n`
-    );
-  }
-}

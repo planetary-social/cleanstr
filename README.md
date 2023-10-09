@@ -14,8 +14,9 @@ Cleanster is a Google Cloud Function node application designed to filter and mod
 ## Requirements
 
 - Google Cloud Account
-- Node.js v16+
+- Node.js v20+
 - OpenAI API Key
+- Nostr account
 
 ## Installation
 
@@ -26,35 +27,22 @@ Cleanster is a Google Cloud Function node application designed to filter and mod
    cd cleanster
    ```
 
-2. **Install Dependencies**
+2. **Prerequisites**
 
-   ```bash
-   npm install
-   ```
-
-3. **Setup Configuration NOT IMPLEMENTED**
-
-   Rename `config.sample.json` to `config.json` and populate it with your OpenAI API key and any other necessary configurations.
+   - Install the Datastore emulator following these [instructions](https://cloud.google.com/datastore/docs/tools/datastore-emulator).
+   - Install Dependencies with `pnpm install`
 
 ## Usage
 
-1. **Run Locally NOT IMPLEMENTED**
+1. **Tests**
 
-   Start the application locally using:
+   Ensure you have a `NOSTR_PRIVATE_KEY` env key set with a test account and then start the datastore emulator with `pnpm startDataStoreEmulator`.
 
-   ```bash
-   npm run start
-   ```
-
-   This will start the node server and begin processing the Nostr pubsub feed through OpenAI's moderation service.
+   In another terminal run the tests with `pnpm test`
 
 2. **Deploy to Google Cloud**
 
-   Ensure you have the gcloud CLI set up and configured with your account credentials. Then:
-
-   ```bash
-   npm run deploy
-   ```
+   Ensure you have the gcloud CLI set up and configured with your account credentials. Then `pnpm deploy`
 
 3. **Monitor Output**
 

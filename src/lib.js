@@ -1,3 +1,4 @@
+import { Datastore } from '@google-cloud/datastore';
 import NDK, { NDKEvent, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { WebSocket } from 'ws';
 
@@ -19,6 +20,7 @@ const RELAYS = [
   'wss://rss.nos.social',
 ];
 
+const datastore = new Datastore();
 const signer = new NDKPrivateKeySigner(process.env.NOSTR_PRIVATE_KEY);
 const userPromise = signer.user();
 
@@ -67,7 +69,7 @@ async function publishModeration(moderatedNostrEvent, moderation) {
   moderationEvent.kind = 1985;
 
   setTags(moderationEvent, moderatedNostrEvent, moderation);
-  moderationEvent.content = getContent(moderation);
+  moderationEvent.content = createContentText(moderation);
 
   await moderationEvent.sign(ndk.signer);
   await moderationEvent.publish();
@@ -101,7 +103,7 @@ function setTags(moderationEvent, moderatedNostrEvent, moderation) {
   }
 }
 
-function getContent(moderation) {
+function createContentText(moderation) {
   return Object.entries(moderation.categories)
     .reduce((content, [category, isFlagged]) => {
       if (isFlagged) {
@@ -112,6 +114,33 @@ function getContent(moderation) {
     .trim();
 }
 
+async function processIfNotDuplicate(event, processingFunction) {
+  const eventAlreadyProcessed = await isEventAlreadyProcessed(event);
+
+  if (eventAlreadyProcessed) {
+    console.log(`Event ${event.id} already processed. Skipping`);
+    return;
+  }
+
+  await processingFunction(event);
+  await markEventAsProcessed(event);
+}
+
+async function isEventAlreadyProcessed(event) {
+  const key = datastore.key(['moderatedNostrEvents', event?.id]);
+  const [entity] = await datastore.get(key);
+  return !!entity;
+}
+
+async function markEventAsProcessed(event) {
+  const key = datastore.key(['moderatedNostrEvents', event?.id]);
+  const data = {
+    key: key,
+    data: { seen: true },
+  };
+  await datastore.save(data);
+}
+
 async function waitMillis(millis) {
   await new Promise((resolve) => setTimeout(resolve, millis));
 }
@@ -120,4 +149,5 @@ async function waitMillis(millis) {
 export default {
   publishModeration,
   waitMillis,
+  processIfNotDuplicate,
 };
