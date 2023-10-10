@@ -7,10 +7,14 @@ export async function assertDataStoreEmulatorIsRunning() {
     });
 
     if (response.status !== 200) {
-      throw new Error(`Unexpected status code: ${response.status}`);
+      throw new Error(
+        `You need to run the Datastore emulator before running tests`
+      );
     }
   } catch (error) {
-    throw new Error(`Healthcheck failed: ${error.message}`);
+    throw new Error(
+      `You need to run the Datastore emulator before running tests`
+    );
   }
 }
 

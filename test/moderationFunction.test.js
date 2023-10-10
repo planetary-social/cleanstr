@@ -1,15 +1,16 @@
+import assert from 'assert';
+import sinon from 'sinon';
 import { getFunction } from '@google-cloud/functions-framework/testing';
 import { Datastore } from '@google-cloud/datastore';
 import { assertDataStoreEmulatorIsRunning, resetDataStore } from './utils.js';
 
-import assert from 'assert';
-import sinon from 'sinon';
-import lib from '../src/lib.js';
 import { NDKEvent } from '@nostr-dev-kit/ndk';
+import RateLimiting from '../src/lib/rateLimiting.js';
 import OpenAI from 'openai';
+import Nostr from '../src/lib/nostr.js';
+
 import '../index.js';
 
-const datastore = new Datastore();
 const nostrEvent = {
   id: '4376c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a65',
   pubkey: '6e468422dfb74a5738702a8823b9b28168abab8655faacb6853cd0ee15deee93',
@@ -34,7 +35,7 @@ const flaggedNostrEvent = {
   sig: '9e158221df2d0e09bbdced2910d9d06a1a2838d3281e761f019bb4ca227afdf263a0464e74252f002ca7cd5f0cff6bf84531362a778868786b8a4f9e6a7250b0',
 };
 
-describe('Function', () => {
+describe('Moderation Cloud Function', () => {
   before(async function () {
     await assertDataStoreEmulatorIsRunning();
   });
@@ -52,7 +53,7 @@ describe('Function', () => {
   });
 
   it('should do nothing for a valid event that is not flagged', async () => {
-    sinon.stub(lib, 'publishModeration');
+    sinon.stub(Nostr, 'publishModeration');
     const cloudEvent = { data: { message: {} } };
     cloudEvent.data.message = {
       data: Buffer.from(JSON.stringify(nostrEvent)).toString('base64'),
@@ -61,8 +62,8 @@ describe('Function', () => {
     const nostrEventsPubSub = getFunction('nostrEventsPubSub');
     await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(lib.publishModeration.notCalled);
-    lib.publishModeration.restore();
+    assert.ok(Nostr.publishModeration.notCalled);
+    Nostr.publishModeration.restore();
   });
 
   it('should publish a moderation event for a valid event that is flagged', async () => {
@@ -70,7 +71,7 @@ describe('Function', () => {
     cloudEvent.data.message = {
       data: Buffer.from(JSON.stringify(flaggedNostrEvent)).toString('base64'),
     };
-    const waitMillisStub = sinon.stub(lib, 'waitMillis');
+    const waitMillisStub = sinon.stub(RateLimiting, 'waitMillis');
     const nostrEventsPubSub = getFunction('nostrEventsPubSub');
 
     await nostrEventsPubSub(cloudEvent);
@@ -125,7 +126,7 @@ describe('Function', () => {
           status: 429,
         },
       });
-    const waitMillisStub = sinon.stub(lib, 'waitMillis');
+    const waitMillisStub = sinon.stub(RateLimiting, 'waitMillis');
 
     // Ensure the rate limit error is still thrown after being handled so that
     // we still trigger the pubsub topic subscription retry policy

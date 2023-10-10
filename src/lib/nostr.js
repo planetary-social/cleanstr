@@ -1,5 +1,5 @@
-import { Datastore } from '@google-cloud/datastore';
 import NDK, { NDKEvent, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
+import { validateEvent, verifySignature } from 'nostr-tools';
 import { WebSocket } from 'ws';
 
 if (!process.env.NOSTR_PRIVATE_KEY) {
@@ -20,7 +20,6 @@ const RELAYS = [
   'wss://rss.nos.social',
 ];
 
-const datastore = new Datastore();
 const signer = new NDKPrivateKeySigner(process.env.NOSTR_PRIVATE_KEY);
 const userPromise = signer.user();
 
@@ -56,98 +55,79 @@ const MODERATION_CATEGORIES = {
     'Content that depicts death, violence, or physical injury in graphic detail.',
 };
 
-// Creates a NIP-32 event flagging a Nostr event.
-// See: https://github.com/nostr-protocol/nips/blob/master/32.md
-async function publishModeration(moderatedNostrEvent, moderation) {
-  // Ensure we are already connected and it was done once in the module scope
-  // during cold start
-  await connectedPromise;
-  const user = await userPromise;
+export default class Nostr {
+  // Creates a NIP-32 event flagging a Nostr event.
+  // See: https://github.com/nostr-protocol/nips/blob/master/32.md
+  static async publishModeration(moderatedNostrEvent, moderation) {
+    // Ensure we are already connected and it was done once in the module scope
+    // during cold start
+    await connectedPromise;
+    const user = await userPromise;
 
-  const moderationEvent = new NDKEvent(ndk);
+    const moderationEvent = new NDKEvent(ndk);
 
-  moderationEvent.kind = 1985;
+    moderationEvent.kind = 1985;
 
-  setTags(moderationEvent, moderatedNostrEvent, moderation);
-  moderationEvent.content = createContentText(moderation);
+    this.setTags(moderationEvent, moderatedNostrEvent, moderation);
+    moderationEvent.content = this.createContentText(moderation);
 
-  await moderationEvent.sign(ndk.signer);
-  await moderationEvent.publish();
+    await moderationEvent.sign(ndk.signer);
+    await moderationEvent.publish();
 
-  console.log(
-    `Published moderation event ${moderationEvent.id} on ${user.npub}`
-  );
+    console.log(
+      `Published moderation event ${moderationEvent.id} on ${user.npub}`
+    );
 
-  return moderationEvent;
-}
+    return moderationEvent;
+  }
 
-function setTags(moderationEvent, moderatedNostrEvent, moderation) {
-  moderationEvent.tags.push([
-    'e',
-    moderatedNostrEvent.id,
-    'wss://relay.damus.io',
-  ]);
-  moderationEvent.tags.push(['L', 'com.openai.ontology']);
+  static getVerifiedEvent(data) {
+    const eventJSON = data ? Buffer.from(data, 'base64').toString() : '{}';
+    const event = JSON.parse(eventJSON);
 
-  for (const [category, isFlagged] of Object.entries(moderation.categories)) {
-    if (isFlagged) {
-      moderationEvent.tags.push([
-        'l',
-        category,
-        'com.openai.ontology',
-        JSON.stringify({
-          confidence: moderation.category_scores[category],
-        }),
-      ]);
+    if (!validateEvent(event)) {
+      console.error('Invalid Nostr Event');
+      return;
+    }
+
+    if (!verifySignature(event)) {
+      console.error('Invalid Nostr Event Signature');
+      return;
+    }
+
+    return event;
+  }
+
+  static setTags(moderationEvent, moderatedNostrEvent, moderation) {
+    moderationEvent.tags.push([
+      'e',
+      moderatedNostrEvent.id,
+      'wss://relay.damus.io',
+    ]);
+    moderationEvent.tags.push(['L', 'com.openai.ontology']);
+
+    for (const [category, isFlagged] of Object.entries(moderation.categories)) {
+      if (isFlagged) {
+        moderationEvent.tags.push([
+          'l',
+          category,
+          'com.openai.ontology',
+          JSON.stringify({
+            confidence: moderation.category_scores[category],
+          }),
+        ]);
+      }
     }
   }
-}
 
-function createContentText(moderation) {
-  return Object.entries(moderation.categories)
-    .reduce((content, [category, isFlagged]) => {
-      if (isFlagged) {
-        content += MODERATION_CATEGORIES[category] + '\n\n';
-      }
-      return content;
-    }, '')
-    .trim();
-}
-
-async function processIfNotDuplicate(event, processingFunction) {
-  const eventAlreadyProcessed = await isEventAlreadyProcessed(event);
-
-  if (eventAlreadyProcessed) {
-    console.log(`Event ${event.id} already processed. Skipping`);
-    return;
+  static createContentText(moderation) {
+    return Object.entries(moderation.categories)
+      .reduce((content, [category, isFlagged]) => {
+        if (isFlagged) {
+          content += MODERATION_CATEGORIES[category] + '\n\n';
+        }
+        return content;
+      }, '')
+      .trim();
   }
-
-  await processingFunction(event);
-  await markEventAsProcessed(event);
 }
-
-async function isEventAlreadyProcessed(event) {
-  const key = datastore.key(['moderatedNostrEvents', event?.id]);
-  const [entity] = await datastore.get(key);
-  return !!entity;
-}
-
-async function markEventAsProcessed(event) {
-  const key = datastore.key(['moderatedNostrEvents', event?.id]);
-  const data = {
-    key: key,
-    data: { seen: true },
-  };
-  await datastore.save(data);
-}
-
-async function waitMillis(millis) {
-  await new Promise((resolve) => setTimeout(resolve, millis));
-}
-
-// This trick is needed so that we can stub the function in our tests
-export default {
-  publishModeration,
-  waitMillis,
-  processIfNotDuplicate,
-};
