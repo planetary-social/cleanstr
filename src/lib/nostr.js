@@ -90,10 +90,14 @@ export default class Nostr {
       return;
     }
 
-    if (!verifySignature(event)) {
-      console.error('Invalid Nostr Event Signature');
-      return;
-    }
+    // TODO: We comment signature verification for now because high CPU usage in
+    // our Google Cloud Function.  See:
+    // https://planetary-app.slack.com/archives/CP4D5FQ87/p1696947806634059
+    //
+    // if (!verifySignature(event)) {
+    //   console.error('Invalid Nostr Event Signature');
+    //   return;
+    // }
 
     return event;
   }

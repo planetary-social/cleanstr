@@ -3,8 +3,9 @@ const RATE_LIMIT_ERROR_CODE = 429;
 
 // We export a class so that it's easy to mock with sinon
 export default class RateLimiting {
-  // This function is used to add jitter to the function execution when a rate limit error is thrown
-  static async jitterOnThrow(func) {
+  // This function is used to add jitter to the function execution when a rate
+  // limit error is thrown. The rest of the errors are only logged
+  static async handleRateLimit(func) {
     const startTime = Date.now();
 
     try {
@@ -15,6 +16,10 @@ export default class RateLimiting {
         await this.randomPause(startTime);
         throw error;
       }
+
+      // The rest of the errors are logged but not thrown so that the function
+      // is not retried
+      console.error('Error processing event', error);
     }
   }
 

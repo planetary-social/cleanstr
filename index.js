@@ -7,22 +7,25 @@ import Nostr from './src/lib/nostr.js';
 import DuplicationHandling from './src/lib/duplicationHandling.js';
 
 functions.cloudEvent('nostrEventsPubSub', async (cloudEvent) => {
-  const event = Nostr.getVerifiedEvent(cloudEvent.data.message.data);
+  const nostrEvent = Nostr.getVerifiedEvent(cloudEvent.data.message.data);
 
-  if (!event) {
+  if (!nostrEvent) {
     return;
   }
 
-  await DuplicationHandling.processIfNotDuplicate(event, async (event) => {
-    await RateLimiting.jitterOnThrow(async function () {
-      const moderation = await openAIClientPool.getModeration(event);
+  await RateLimiting.handleRateLimit(async function () {
+    await DuplicationHandling.processIfNotDuplicate(
+      nostrEvent,
+      async (event) => {
+        const moderation = await openAIClientPool.getModeration(event);
 
-      if (!moderation) {
-        console.log(`Nostr Event ${event.id} passed moderation. Skipping`);
-        return;
+        if (!moderation) {
+          console.log(`Nostr Event ${event.id} passed moderation. Skipping`);
+          return;
+        }
+
+        await Nostr.publishModeration(event, moderation);
       }
-
-      await Nostr.publishModeration(event, moderation);
-    });
+    );
   });
 });

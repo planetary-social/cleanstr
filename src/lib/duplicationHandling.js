@@ -1,6 +1,7 @@
 import { Datastore } from '@google-cloud/datastore';
 const datastore = new Datastore();
 
+// If an event is already processed, we don't want to process it again. We use a Datastore entity to keep track of which events have already been processed.
 export default class DuplicationHandling {
   static async processIfNotDuplicate(event, processingFunction) {
     const eventAlreadyProcessed = await this.isEventAlreadyProcessed(event);
