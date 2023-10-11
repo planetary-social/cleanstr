@@ -19,8 +19,9 @@
     "test:grep": "gcloud beta emulators datastore env-init && c8 mocha -p -j 2 --timeout=5000 --grep",
     "test:rateLimit": "node runArtilleryTest.mjs",
     "logs": "gcloud functions logs read nodejs-moderator-function --gen2",
-    "sendTestEvent": "curl -m 70 -X POST https://us-central1-pub-verse-app.cloudfunctions.net/nodejs-moderator-function -H \"Authorization: bearer $(gcloud auth print-identity-token)\" -H \"Content-Type: application/json\" -H \"ce-id: 1234567890\" -H \"ce-specversion: 1.0\" -H \"ce-type: google.cloud.pubsub.topic.v1.messagePublished\" -H \"ce-time: 2020-08-08T00:11:44.895529672Z\" -H \"ce-source: //pubsub.googleapis.com/projects/pub-verse-app/topics/nostr-events\" -d '{  \"message\": {\"data\": \"eyJjb250ZW50IjoiSSB3YW50IHRvIGtpbGwgeW91IEpvaG4gRG9lIGFuZCBmdWNrIHlvdXIgY29ycHNlIiwiY3JlYXRlZF9hdCI6MTY5NjQzNzM2OSwiaWQiOiJjZGIxM2MzZGUyYTBmODM4ZTdhZDkzZjNkODcxOWM3MjIwNzA2MTFkNWU1Y2Q4NjBkNTEwNGNiMjFiZDNlNjBiIiwia2luZCI6MSwicHVia2V5IjoiZTlmMzZlNzM4ZTZjMDczMDY4ZjA3YjE4NTFiNDA2ZmU1NzM1NDk1MDdkZGMzYzJjMDA3YjkwOGVlMjNiYmQ1MiIsInNpZyI6ImUyOWRiNWUzZTI1NzViMmIzYzVjMTQ4ZDA2Y2VhZDg1MmRmNTVlNmIwMDQwNTE4NDVkZmUzZmE1MmU0MzM4NTY0NTViNDA5YzU5MGY1NDNlMDk0ZWY3ZTc5NmFlODliOWE5NjI4NGE0YzdhYmJiOWJiMWM0Mjk5NjYwMTdmNWFlIiwidGFncyI6W119Cg==\"}}'",
+    "sendTestEvent": "./bin/sendTestEvent.sh",
     "deploy": "gcloud functions deploy nodejs-moderator-function --gen2 --runtime=nodejs20 --region=us-central1 --trigger-topic nostr-events --source=. --entry-point=nostrEventsPubSub --retry"
+
   },
   "dependencies": {
     "@google-cloud/datastore": "^8.2.1",

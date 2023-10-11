@@ -11,6 +11,12 @@ export class OpenAIClientPool {
     const response = await client.moderations.create({ input: event.content });
     const moderation = response.results[0];
 
+    console.log(
+      `Moderation for event ${event.id} with content "${
+        event.content.slice(0, 20) + '...'
+      }": ${JSON.stringify(moderation)}`
+    );
+
     if (moderation.flagged) {
       return moderation;
     }

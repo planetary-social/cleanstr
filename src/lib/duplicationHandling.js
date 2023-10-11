@@ -4,9 +4,9 @@ const datastore = new Datastore();
 // If an event is already processed, we don't want to process it again. We use a Datastore entity to keep track of which events have already been processed.
 export default class DuplicationHandling {
   static async processIfNotDuplicate(event, processingFunction) {
-    const eventAlreadyProcessed = await this.isEventAlreadyProcessed(event);
+    const isEventAlreadyProcessed = await this.isEventAlreadyProcessed(event);
 
-    if (eventAlreadyProcessed) {
+    if (isEventAlreadyProcessed) {
       console.log(`Event ${event.id} already processed. Skipping`);
       return;
     }

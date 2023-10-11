@@ -23,7 +23,6 @@ README.md
 coverage/
 example_openai.ts
 node_modules
-pnpm-lock.yaml
 test/
 artillery-config.yaml
 runArtilleryTest.mjs
