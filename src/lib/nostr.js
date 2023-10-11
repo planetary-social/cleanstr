@@ -10,15 +10,7 @@ if (!process.env.NOSTR_PRIVATE_KEY) {
 global.WebSocket = WebSocket;
 
 // TODO: Should we get relays from the pubsub message or extend it through a query of kind 10002 events?
-const RELAYS = [
-  'wss://relay.damus.io',
-  'wss://eden.nostr.land',
-  'wss://nos.lol',
-  'wss://relay.snort.social',
-  'wss://relay.s3x.social',
-  'wss://relay.protest.net',
-  'wss://rss.nos.social',
-];
+const RELAYS = ['wss://relay.nos.social'];
 
 const signer = new NDKPrivateKeySigner(process.env.NOSTR_PRIVATE_KEY);
 const userPromise = signer.user();
@@ -106,7 +98,7 @@ export default class Nostr {
     moderationEvent.tags.push([
       'e',
       moderatedNostrEvent.id,
-      'wss://relay.damus.io',
+      'wss://relay.nos.social', // TODO: This should be instead the source of this event
     ]);
     moderationEvent.tags.push(['L', 'com.openai.ontology']);
 
