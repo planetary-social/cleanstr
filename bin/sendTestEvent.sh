@@ -3,14 +3,17 @@
 event_content="$1"
 
 if [ -z "$2" ]; then
-  nostr_secret_key="$NOSTR_SECRET_KEY"
+  nostr_private_key="$NOSTR_PRIVATE_KEY"
 else
-  nostr_secret_key="$2"
+  nostr_private_key="$2"
 fi
 
+if [ -z "$nostr_private_key" ]; then
+  echo "Missing Nostr Secret Key. Please set the NOSTR_PRIVATE_KEY environment variable or pass it as the second argument to this script."
+  exit 1
+fi
 
-
-JSON_PAYLOAD=$(nak event -c "$event_content" --sec "$nostr_secret_key" | jq -c .)
+JSON_PAYLOAD=$(nak event -c "$event_content" --sec "$nostr_private_key" | jq -c .)
 echo "JSON Payload is: $JSON_PAYLOAD"
 
 BASE64_PAYLOAD=$(echo -n "$JSON_PAYLOAD" | base64 | tr -d '\n')

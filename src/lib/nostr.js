@@ -47,6 +47,20 @@ const MODERATION_CATEGORIES = {
     'Content that depicts death, violence, or physical injury in graphic detail.',
 };
 
+const CATEGORY_MAPPING = {
+  hate: 'profanity',
+  'hate/threatening': 'profanity',
+  harassment: 'profanity',
+  'harassment/threatening': 'profanity',
+  'self-harm': 'illegal',
+  'self-harm/intent': 'illegal',
+  'self-harm/instructions': 'illegal',
+  sexual: 'nudity',
+  'sexual/minors': 'illegal',
+  violence: 'profanity',
+  'violence/graphic': 'profanity',
+};
+
 export default class Nostr {
   // Creates a NIP-32 event flagging a Nostr event.
   // See: https://github.com/nostr-protocol/nips/blob/master/32.md
@@ -58,19 +72,23 @@ export default class Nostr {
 
     const moderationEvent = new NDKEvent(ndk);
 
-    moderationEvent.kind = 1985;
+    moderationEvent.kind = 1984;
 
     this.setTags(moderationEvent, moderatedNostrEvent, moderation);
     moderationEvent.content = this.createContentText(moderation);
 
     await moderationEvent.sign(ndk.signer);
-    await moderationEvent.publish();
+    await Nostr.publishNostrEvent(moderationEvent);
 
     console.log(
       `Published moderation event ${moderationEvent.id} on ${user.npub}`
     );
 
     return moderationEvent;
+  }
+
+  static async publishNostrEvent(event) {
+    await event.publish();
   }
 
   static getVerifiedEvent(data) {
@@ -94,17 +112,14 @@ export default class Nostr {
     return event;
   }
 
-  static setTags(moderationEvent, moderatedNostrEvent, moderation) {
-    moderationEvent.tags.push([
-      'e',
-      moderatedNostrEvent.id,
-      'wss://relay.nos.social', // TODO: This should be instead the source of this event
-    ]);
-    moderationEvent.tags.push(['L', 'com.openai.ontology']);
+  static setTags(moderationNostrEvent, moderatedNostrEvent, moderation) {
+    const reportType = this.getReportType(moderation);
+    moderationNostrEvent.tags.push(['e', moderatedNostrEvent.id, reportType]);
+    moderationNostrEvent.tags.push(['L', 'com.openai.ontology']);
 
     for (const [category, isFlagged] of Object.entries(moderation.categories)) {
       if (isFlagged) {
-        moderationEvent.tags.push([
+        moderationNostrEvent.tags.push([
           'l',
           category,
           'com.openai.ontology',
@@ -114,6 +129,28 @@ export default class Nostr {
         ]);
       }
     }
+  }
+
+  static getReportType(moderation) {
+    const highestScoreCategory = this.getHighestScoreCategory(moderation);
+    return CATEGORY_MAPPING[highestScoreCategory];
+  }
+
+  static getHighestScoreCategory(moderation) {
+    const categories = moderation.categories;
+    const categoryScores = moderation.category_scores;
+
+    let highestCategory = null;
+    let highestScore = -Infinity;
+
+    for (const [category, flagged] of Object.entries(categories)) {
+      if (flagged && categoryScores[category] > highestScore) {
+        highestScore = categoryScores[category];
+        highestCategory = category;
+      }
+    }
+
+    return highestCategory;
   }
 
   static createContentText(moderation) {

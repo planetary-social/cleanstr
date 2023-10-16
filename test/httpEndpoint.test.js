@@ -1,6 +1,8 @@
 import supertest from 'supertest';
+import sinon from 'sinon';
+import Nostr from '../src/lib/nostr.js';
+import { Datastore } from '@google-cloud/datastore';
 import * as functionsFramework from '@google-cloud/functions-framework/testing';
-import { assertDataStoreEmulatorIsRunning, resetDataStore } from './utils.js';
 import '../index.js';
 
 const flaggedNostrEvent = {
@@ -16,12 +18,14 @@ const flaggedNostrEvent = {
 describe('HTTP Endpoint', function () {
   this.timeout(5000);
 
-  before(async function () {
-    await assertDataStoreEmulatorIsRunning();
+  beforeEach(async function () {
+    sinon.stub(Nostr, 'publishNostrEvent').returns(Promise.resolve());
+    sinon.stub(Datastore.prototype, 'get').resolves([]);
+    sinon.stub(Datastore.prototype, 'save').resolves();
   });
 
-  beforeEach(async function () {
-    await resetDataStore();
+  afterEach(function () {
+    sinon.restore();
   });
 
   it('should process a CloudEvent containing a valid nostr Event', async () => {

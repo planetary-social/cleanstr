@@ -13,15 +13,13 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "startDatastoreEmulator": "gcloud beta emulators datastore start --no-store-on-disk --use-firestore-in-datastore-mode",
-    "test": "gcloud beta emulators datastore env-init && c8 mocha -p -j 2 test/*.test.js --timeout=5000",
-    "test:integration": "gcloud beta emulators datastore env-init && c8 mocha -p -j 2 test/integration.test.js --timeout=5000",
-    "test:grep": "gcloud beta emulators datastore env-init && c8 mocha -p -j 2 --timeout=5000 --grep",
+    "test": "c8 mocha -p -j 2 test/*.test.js --timeout=5000",
+    "test:integration": "c8 mocha -p -j 2 test/integration.test.js --timeout=5000",
+    "test:grep": "c8 mocha -p -j 2 --timeout=5000 --grep",
     "test:rateLimit": "node runArtilleryTest.mjs",
     "logs": "gcloud functions logs read nodejs-moderator-function --gen2",
     "sendTestEvent": "./bin/sendTestEvent.sh",
     "deploy": "gcloud functions deploy nodejs-moderator-function --gen2 --runtime=nodejs20 --region=us-central1 --trigger-topic nostr-events --source=. --entry-point=nostrEventsPubSub --retry"
-
   },
   "dependencies": {
     "@google-cloud/datastore": "^8.2.1",
@@ -32,7 +30,6 @@
     "ws": "^8.14.2"
   },
   "devDependencies": {
-    "axios": "^1.5.1",
     "c8": "^8.0.0",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
