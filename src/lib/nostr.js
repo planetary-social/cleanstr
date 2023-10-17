@@ -70,6 +70,21 @@ export default class Nostr {
     await connectedPromise;
     const user = await userPromise;
 
+    const moderationEvent = await Nostr.createReportEvent(
+      moderatedNostrEvent,
+      moderation
+    );
+
+    await Nostr.publishNostrEvent(moderationEvent);
+
+    console.log(
+      `Published moderation event ${moderationEvent.id} on ${user.npub}`
+    );
+
+    return moderationEvent;
+  }
+
+  static async createReportEvent(moderatedNostrEvent, moderation) {
     const moderationEvent = new NDKEvent(ndk);
 
     moderationEvent.kind = 1984;
@@ -78,12 +93,6 @@ export default class Nostr {
     moderationEvent.content = this.createContentText(moderation);
 
     await moderationEvent.sign(ndk.signer);
-    await Nostr.publishNostrEvent(moderationEvent);
-
-    console.log(
-      `Published moderation event ${moderationEvent.id} on ${user.npub}`
-    );
-
     return moderationEvent;
   }
 

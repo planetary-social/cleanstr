@@ -33,6 +33,30 @@ const flaggedNostrEvent = {
   sig: '9e158221df2d0e09bbdced2910d9d06a1a2838d3281e761f019bb4ca227afdf263a0464e74252f002ca7cd5f0cff6bf84531362a778868786b8a4f9e6a7250b0',
 };
 
+const reportNostrEvent = {
+  id: 'd6548d08b8bc5dff67004ca072d717d95537ee66c2321f4adc40f0149de93188',
+  pubkey: 'e9f36e738e6c073068f07b1851b406fe573549507ddc3c2c007b908ee23bbd52',
+  created_at: 1697540521,
+  kind: 1984,
+  content: 'Hateful!',
+  tags: [
+    [
+      'e',
+      '30dae701db171d7cf78b40c673e460f36a117bfc272fb11091884619b427ef31',
+      'profanity',
+    ],
+    ['L', 'com.openai.ontology'],
+    ['l', 'hate', 'com.openai.ontology', '{"confidence":0.7413473725318909}'],
+    [
+      'l',
+      'harassment',
+      'com.openai.ontology',
+      '{"confidence":0.9882562756538391}',
+    ],
+  ],
+  sig: 'befe8562e11a8efad0a68f699905e913cffc6e95313595b41d4f2c5d03a98cea1d6a79389a039e96b93006043315fa03fcba17f24b60a70319eec584a8dba444',
+};
+
 describe('Moderation Cloud Function', () => {
   beforeEach(async function () {
     sinon.spy(console, 'error');
@@ -48,9 +72,12 @@ describe('Moderation Cloud Function', () => {
 
   it('should do nothing for a valid event that is not flagged', async () => {
     sinon.stub(Nostr, 'publishModeration');
-    const cloudEvent = { data: { message: {} } };
-    cloudEvent.data.message = {
-      data: Buffer.from(JSON.stringify(nostrEvent)).toString('base64'),
+    const cloudEvent = {
+      data: {
+        message: {
+          data: Buffer.from(JSON.stringify(nostrEvent)).toString('base64'),
+        },
+      },
     };
 
     const nostrEventsPubSub = getFunction('nostrEventsPubSub');
@@ -60,41 +87,143 @@ describe('Moderation Cloud Function', () => {
     Nostr.publishModeration.restore();
   });
 
-  it('should publish a moderation event for a valid event that is flagged', async () => {
-    const cloudEvent = { data: { message: {} } };
-    cloudEvent.data.message = {
-      data: Buffer.from(JSON.stringify(flaggedNostrEvent)).toString('base64'),
+  it('should publish a report event for a valid event that is flagged', async () => {
+    const cloudEvent = {
+      data: {
+        message: {
+          data: Buffer.from(JSON.stringify(flaggedNostrEvent)).toString(
+            'base64'
+          ),
+        },
+      },
     };
-    const waitMillisStub = sinon.stub(RateLimiting, 'waitMillis');
-    const nostrEventsPubSub = getFunction('nostrEventsPubSub');
 
+    const waitMillisStub = sinon.stub(RateLimiting, 'waitMillis');
+
+    sinon.stub(OpenAI.Moderations.prototype, 'create').resolves({
+      results: [
+        {
+          flagged: true,
+          categories: {
+            sexual: false,
+            hate: true,
+            harassment: true,
+            'self-harm': false,
+            'sexual/minors': false,
+            'hate/threatening': false,
+            'violence/graphic': false,
+            'self-harm/intent': false,
+            'self-harm/instructions': false,
+            'harassment/threatening': false,
+            violence: false,
+          },
+          category_scores: {
+            sexual: 0.0008905100985430181,
+            hate: 0.7413473725318909,
+            harassment: 0.9882562756538391,
+            'self-harm': 0.000020246614440111443,
+            'sexual/minors': 0.000046280372771434486,
+            'hate/threatening': 0.000006213878805283457,
+            'violence/graphic': 0.000014815827853453811,
+            'self-harm/intent': 0.00004021823042421602,
+            'self-harm/instructions': 0.000009193716323352419,
+            'harassment/threatening': 0.0007776615675538778,
+            violence: 0.00004086320041096769,
+          },
+        },
+      ],
+    });
+
+    const nostrEventsPubSub = getFunction('nostrEventsPubSub');
     await nostrEventsPubSub(cloudEvent);
 
     assert.ok(Nostr.publishNostrEvent.called);
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
-        ['e', sinon.match.string, 'profanity'],
+        ['e', flaggedNostrEvent.id, 'profanity'],
         ['L', 'com.openai.ontology'],
+        ['l', 'hate', 'com.openai.ontology', sinon.match.string],
         ['l', 'harassment', 'com.openai.ontology', sinon.match.string],
-        [
-          'l',
-          'harassment/threatening',
-          'com.openai.ontology',
-          sinon.match.string,
-        ],
-        ['l', 'violence', 'com.openai.ontology', sinon.match.string],
+      ],
+    });
+    sinon.assert.notCalled(waitMillisStub);
+  });
+
+  it('should publish a labeling event for a valid report event that is flagged', async () => {
+    const cloudEvent = {
+      data: {
+        message: {
+          data: Buffer.from(JSON.stringify(reportNostrEvent)).toString(
+            'base64'
+          ),
+        },
+      },
+    };
+
+    const waitMillisStub = sinon.stub(RateLimiting, 'waitMillis');
+
+    sinon.stub(OpenAI.Moderations.prototype, 'create').resolves({
+      results: [
+        {
+          flagged: true,
+          categories: {
+            sexual: false,
+            hate: true,
+            harassment: true,
+            'self-harm': false,
+            'sexual/minors': false,
+            'hate/threatening': false,
+            'violence/graphic': false,
+            'self-harm/intent': false,
+            'self-harm/instructions': false,
+            'harassment/threatening': false,
+            violence: false,
+          },
+          category_scores: {
+            sexual: 0.0008905100985430181,
+            hate: 0.7413473725318909,
+            harassment: 0.9882562756538391,
+            'self-harm': 0.000020246614440111443,
+            'sexual/minors': 0.000046280372771434486,
+            'hate/threatening': 0.000006213878805283457,
+            'violence/graphic': 0.000014815827853453811,
+            'self-harm/intent': 0.00004021823042421602,
+            'self-harm/instructions': 0.000009193716323352419,
+            'harassment/threatening': 0.0007776615675538778,
+            violence: 0.00004086320041096769,
+          },
+        },
+      ],
+    });
+
+    const nostrEventsPubSub = getFunction('nostrEventsPubSub');
+    await nostrEventsPubSub(cloudEvent);
+
+    assert.ok(Nostr.publishNostrEvent.called);
+    sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
+      kind: 1985,
+      tags: [
+        ['e', flaggedNostrEvent.id, 'wss://relay.nos.social'],
+        ['L', 'com.openai.ontology'],
+        ['l', 'hate', 'com.openai.ontology', sinon.match.string],
+        ['l', 'harassment', 'com.openai.ontology', sinon.match.string],
       ],
     });
     sinon.assert.notCalled(waitMillisStub);
   });
 
   it('should detect and invalid event', async () => {
-    const cloudEvent = { data: { message: {} } };
-    const nEvent = { ...nostrEvent };
-    delete nEvent.kind;
-    cloudEvent.data.message = {
-      data: Buffer.from(JSON.stringify(nEvent)).toString('base64'),
+    const invalidNostrEvent = { ...nostrEvent };
+    delete invalidNostrEvent.kind;
+    const cloudEvent = {
+      data: {
+        message: {
+          data: Buffer.from(JSON.stringify(invalidNostrEvent)).toString(
+            'base64'
+          ),
+        },
+      },
     };
 
     const nostrEventsPubSub = getFunction('nostrEventsPubSub');
@@ -105,12 +234,15 @@ describe('Moderation Cloud Function', () => {
   });
 
   xit('should detect and invalid signature', async () => {
-    const cloudEvent = { data: { message: {} } };
     const nEvent = { ...nostrEvent };
     nEvent.id =
       '1111c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a65';
-    cloudEvent.data.message = {
-      data: Buffer.from(JSON.stringify(nEvent)).toString('base64'),
+    const cloudEvent = {
+      data: {
+        message: {
+          data: Buffer.from(JSON.stringify(nEvent)).toString('base64'),
+        },
+      },
     };
 
     const nostrEventsPubSub = getFunction('nostrEventsPubSub');
@@ -121,20 +253,21 @@ describe('Moderation Cloud Function', () => {
   });
 
   it('should add jitter pause after a rate limit error', async () => {
-    const cloudEvent = { data: { message: {} } };
     const nEvent = { ...nostrEvent };
-    cloudEvent.data.message = {
-      data: Buffer.from(JSON.stringify(nEvent)).toString('base64'),
+    const cloudEvent = {
+      data: {
+        message: {
+          data: Buffer.from(JSON.stringify(nEvent)).toString('base64'),
+        },
+      },
     };
 
     const nostrEventsPubSub = getFunction('nostrEventsPubSub');
-    const createModerationStub = sinon
-      .stub(OpenAI.Moderations.prototype, 'create')
-      .rejects({
-        response: {
-          status: 429,
-        },
-      });
+    sinon.stub(OpenAI.Moderations.prototype, 'create').rejects({
+      response: {
+        status: 429,
+      },
+    });
     const waitMillisStub = sinon.stub(RateLimiting, 'waitMillis');
 
     // Ensure the rate limit error is still thrown after being handled so that
