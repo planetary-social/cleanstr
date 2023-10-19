@@ -7,6 +7,10 @@ export class OpenAIClientPool {
   }
 
   async getModeration(event) {
+    if (event.content.trim() === '') {
+      return;
+    }
+
     const client = this.getClient(event.id);
     const response = await client.moderations.create({ input: event.content });
     const moderation = response.results[0];

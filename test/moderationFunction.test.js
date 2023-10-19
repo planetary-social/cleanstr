@@ -34,7 +34,7 @@ const flaggedNostrEvent = {
 };
 
 const reportNostrEvent = {
-  id: 'd6548d08b8bc5dff67004ca072d717d95537ee66c2321f4adc40f0149de93188',
+  id: '080035e9e745ee5f58d1f0d1704a8c77d2008335e3f21f395b4b8f73af8845ba',
   pubkey: 'e9f36e738e6c073068f07b1851b406fe573549507ddc3c2c007b908ee23bbd52',
   created_at: 1697540521,
   kind: 1984,
@@ -42,19 +42,14 @@ const reportNostrEvent = {
   tags: [
     [
       'e',
-      '30dae701db171d7cf78b40c673e460f36a117bfc272fb11091884619b427ef31',
+      'd6548d08b8bc5dff67004ca072d717d95537ee66c2321f4adc40f0149de93188',
       'profanity',
     ],
-    ['L', 'com.openai.ontology'],
-    ['l', 'hate', 'com.openai.ontology', '{"confidence":0.7413473725318909}'],
-    [
-      'l',
-      'harassment',
-      'com.openai.ontology',
-      '{"confidence":0.9882562756538391}',
-    ],
+    ['L', 'MOD'],
+    ['l', 'hate', 'MOD', '{"confidence":0.7413473725318909}'],
+    ['l', 'harassment', 'MOD', '{"confidence":0.9882562756538391}'],
   ],
-  sig: 'befe8562e11a8efad0a68f699905e913cffc6e95313595b41d4f2c5d03a98cea1d6a79389a039e96b93006043315fa03fcba17f24b60a70319eec584a8dba444',
+  sig: 'df77b254f086ba6065ee2ff828601c84836bf6df13a59e0dc49e01b828e3da08cd184c18c26e85736f17ff39241eef894ceae25de1402b2c5ff5432ec656908d',
 };
 
 describe('Moderation Cloud Function', () => {
@@ -141,10 +136,10 @@ describe('Moderation Cloud Function', () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
-        ['e', flaggedNostrEvent.id, 'profanity'],
-        ['L', 'com.openai.ontology'],
-        ['l', 'hate', 'com.openai.ontology', sinon.match.string],
-        ['l', 'harassment', 'com.openai.ontology', sinon.match.string],
+        ['e', flaggedNostrEvent.id, 'illegal'],
+        ['L', 'MOD'],
+        ['l', 'IH', 'MOD', sinon.match.string],
+        ['l', 'IL-har', 'MOD', sinon.match.string],
       ],
     });
     sinon.assert.notCalled(waitMillisStub);
@@ -204,10 +199,10 @@ describe('Moderation Cloud Function', () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1985,
       tags: [
-        ['e', flaggedNostrEvent.id, 'wss://relay.nos.social'],
-        ['L', 'com.openai.ontology'],
-        ['l', 'hate', 'com.openai.ontology', sinon.match.string],
-        ['l', 'harassment', 'com.openai.ontology', sinon.match.string],
+        ['e', flaggedNostrEvent.id, sinon.match('wss://')],
+        ['L', 'MOD'],
+        ['l', 'IH', 'MOD', sinon.match.string],
+        ['l', 'IL-har', 'MOD', sinon.match.string],
       ],
     });
     sinon.assert.notCalled(waitMillisStub);

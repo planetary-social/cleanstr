@@ -1,5 +1,6 @@
 import NDK, { NDKEvent, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
 import { validateEvent, verifySignature } from 'nostr-tools';
+import OPENAI_CATEGORIES from './openAICategories.js';
 import { WebSocket } from 'ws';
 
 if (!process.env.NOSTR_PRIVATE_KEY) {
@@ -9,71 +10,49 @@ if (!process.env.NOSTR_PRIVATE_KEY) {
 // Hack to be able to have a global WebSocket object in Google Cloud Functions
 global.WebSocket = WebSocket;
 
-// TODO: Should we get relays from the pubsub message or extend it through a query of kind 10002 events?
-const RELAYS = ['wss://relay.nos.social'];
+const RELAYS = [
+  'wss://relay.nos.social',
+  'wss://relay.damus.io',
+  'wss://relay.nostr.band',
+  'wss://relayable.org',
+  'wss://nostr.wine',
+];
 
 const signer = new NDKPrivateKeySigner(process.env.NOSTR_PRIVATE_KEY);
 const userPromise = signer.user();
 
 // Keep this initialization in the global module scope so it can be reused
 // across function invocations
-const ndk = new NDK({
-  signer,
-  explicitRelayUrls: RELAYS,
-});
+const ndk = new NDK({ signer, explicitRelayUrls: RELAYS });
 
 const connectedPromise = ndk.connect();
 
-const MODERATION_CATEGORIES = {
-  hate: 'Content that expresses, incites, or promotes hate based on race, gender, ethnicity, religion, nationality, sexual orientation, disability status, or caste. Hateful content aimed at non-protected groups (e.g., chess players) is harrassment.',
-  'hate/threatening':
-    'Hateful content that also includes violence or serious harm towards the targeted group based on race, gender, ethnicity, religion, nationality, sexual orientation, disability status, or caste.',
-  harassment:
-    'Content that expresses, incites, or promotes harassing language towards any target.',
-  'harassment/threatening':
-    'Harassment content that also includes violence or serious harm towards any target.',
-  'self-harm':
-    'Content that promotes, encourages, or depicts acts of self-harm, such as suicide, cutting, and eating disorders.',
-  'self-harm/intent':
-    'Content where the speaker expresses that they are engaging or intend to engage in acts of self-harm, such as suicide, cutting, and eating disorders.',
-  'self-harm/instructions':
-    'Content that encourages performing acts of self-harm, such as suicide, cutting, and eating disorders, or that gives instructions or advice on how to commit such acts.',
-  sexual:
-    'Content meant to arouse sexual excitement, such as the description of sexual activity, or that promotes sexual services (excluding sex education and wellness).',
-  'sexual/minors':
-    'Sexual content that includes an individual who is under 18 years old.',
-  violence: 'Content that depicts death, violence, or physical injury.',
-  'violence/graphic':
-    'Content that depicts death, violence, or physical injury in graphic detail.',
-};
-
-const CATEGORY_MAPPING = {
-  hate: 'profanity',
-  'hate/threatening': 'profanity',
-  harassment: 'profanity',
-  'harassment/threatening': 'profanity',
-  'self-harm': 'illegal',
-  'self-harm/intent': 'illegal',
-  'self-harm/instructions': 'illegal',
-  sexual: 'nudity',
-  'sexual/minors': 'illegal',
-  violence: 'profanity',
-  'violence/graphic': 'profanity',
-};
+export const REPORT_KIND = 1984;
+const LABEL_KIND = 1985;
 
 export default class Nostr {
   // Creates a NIP-32 event flagging a Nostr event.
   // See: https://github.com/nostr-protocol/nips/blob/master/32.md
-  static async publishModeration(moderatedNostrEvent, moderation) {
+  static async publishModeration(moderatedNostrEvent, moderation, fromReport) {
     // Ensure we are already connected and it was done once in the module scope
     // during cold start
     await connectedPromise;
     const user = await userPromise;
 
-    const moderationEvent = await Nostr.createReportEvent(
-      moderatedNostrEvent,
-      moderation
-    );
+    let moderationEvent;
+    if (fromReport) {
+      // Create a label event referring to the reported event
+      moderationEvent = await Nostr.createLabelEvent(
+        moderatedNostrEvent,
+        moderation
+      );
+    } else {
+      // report the rest
+      moderationEvent = await Nostr.createReportEvent(
+        moderatedNostrEvent,
+        moderation
+      );
+    }
 
     await Nostr.publishNostrEvent(moderationEvent);
 
@@ -85,15 +64,27 @@ export default class Nostr {
   }
 
   static async createReportEvent(moderatedNostrEvent, moderation) {
-    const moderationEvent = new NDKEvent(ndk);
+    const reportEvent = new NDKEvent(ndk);
 
-    moderationEvent.kind = 1984;
+    reportEvent.kind = REPORT_KIND;
 
-    this.setTags(moderationEvent, moderatedNostrEvent, moderation);
-    moderationEvent.content = this.createContentText(moderation);
+    this.setTags(reportEvent, moderatedNostrEvent, moderation);
+    reportEvent.content = this.createContentText(moderation);
 
-    await moderationEvent.sign(ndk.signer);
-    return moderationEvent;
+    await reportEvent.sign(ndk.signer);
+    return reportEvent;
+  }
+
+  static async createLabelEvent(moderatedNostrEvent, moderation) {
+    const labelEvent = new NDKEvent(ndk);
+
+    labelEvent.kind = LABEL_KIND;
+
+    await this.setTags(labelEvent, moderatedNostrEvent, moderation);
+    labelEvent.content = this.createContentText(moderation);
+
+    await labelEvent.sign(ndk.signer);
+    return labelEvent;
   }
 
   static async publishNostrEvent(event) {
@@ -118,20 +109,25 @@ export default class Nostr {
     //   return;
     // }
 
-    return event;
+    return new NDKEvent(ndk, event);
   }
 
-  static setTags(moderationNostrEvent, moderatedNostrEvent, moderation) {
-    const reportType = this.getReportType(moderation);
-    moderationNostrEvent.tags.push(['e', moderatedNostrEvent.id, reportType]);
-    moderationNostrEvent.tags.push(['L', 'com.openai.ontology']);
+  static async setTags(moderationNostrEvent, moderatedNostrEvent, moderation) {
+    let extra;
+    if (moderationNostrEvent.kind === REPORT_KIND) {
+      extra = this.inferReportType(moderation);
+    } else {
+      extra = moderatedNostrEvent.relay.url;
+    }
+    moderationNostrEvent.tags.push(['e', moderatedNostrEvent.id, extra]);
+    moderationNostrEvent.tags.push(['L', 'MOD']);
 
     for (const [category, isFlagged] of Object.entries(moderation.categories)) {
       if (isFlagged) {
         moderationNostrEvent.tags.push([
           'l',
-          category,
-          'com.openai.ontology',
+          OPENAI_CATEGORIES[category].nip69,
+          'MOD',
           JSON.stringify({
             confidence: moderation.category_scores[category],
           }),
@@ -140,9 +136,17 @@ export default class Nostr {
     }
   }
 
-  static getReportType(moderation) {
+  static async getReportedNostrEvent(reportNostrEvent) {
+    const reportedNostrEventId = reportNostrEvent.tagValue('e');
+    const reportedNostrEvent = await ndk.fetchEvent({
+      ids: [reportedNostrEventId],
+    });
+    return reportedNostrEvent;
+  }
+
+  static inferReportType(moderation) {
     const highestScoreCategory = this.getHighestScoreCategory(moderation);
-    return CATEGORY_MAPPING[highestScoreCategory];
+    return OPENAI_CATEGORIES[highestScoreCategory].nip56_report_type;
   }
 
   static getHighestScoreCategory(moderation) {
@@ -166,7 +170,7 @@ export default class Nostr {
     return Object.entries(moderation.categories)
       .reduce((content, [category, isFlagged]) => {
         if (isFlagged) {
-          content += MODERATION_CATEGORIES[category] + '\n\n';
+          content += OPENAI_CATEGORIES[category].description + '\n\n';
         }
         return content;
       }, '')

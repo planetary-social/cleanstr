@@ -110,7 +110,5 @@ async function moderate(content: string) {
     body: body,
   });
 
-  const data = await response.json();
-  console.log('Moderation Response:', JSON.stringify(data, null, 2)); // added debugging information
-  return data;
+  return await response.json();
 }

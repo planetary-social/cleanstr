@@ -3,7 +3,7 @@
 import functions from '@google-cloud/functions-framework';
 import openAIClientPool from './src/lib/openAIClientPool.js';
 import RateLimiting from './src/lib/rateLimiting.js';
-import Nostr from './src/lib/nostr.js';
+import Nostr, { REPORT_KIND } from './src/lib/nostr.js';
 import DuplicationHandling from './src/lib/duplicationHandling.js';
 
 functions.cloudEvent('nostrEventsPubSub', async (cloudEvent) => {
@@ -17,14 +17,30 @@ functions.cloudEvent('nostrEventsPubSub', async (cloudEvent) => {
     await DuplicationHandling.processIfNotDuplicate(
       nostrEvent,
       async (event) => {
-        const moderation = await openAIClientPool.getModeration(event);
+        let eventToModerate = event;
+        let skipMessage = `Nostr Event ${event.id} passed moderation. Skipping`;
+        let fromReport = false;
 
-        if (!moderation) {
-          console.log(`Nostr Event ${event.id} passed moderation. Skipping`);
-          return;
+        if (event.kind === REPORT_KIND) {
+          eventToModerate = await Nostr.getReportedNostrEvent(event);
+          if (!eventToModerate) {
+            return console.log(
+              `Couldn't find event reported by report ${event.id}`
+            );
+          }
+          skipMessage = `Nostr Event ${eventToModerate.id} reported by ${event.id} passed moderation. Skipping`;
+          fromReport = true;
         }
 
-        await Nostr.publishModeration(event, moderation);
+        const moderation = await openAIClientPool.getModeration(
+          eventToModerate
+        );
+
+        if (!moderation) {
+          return console.log(skipMessage);
+        }
+
+        await Nostr.publishModeration(eventToModerate, moderation, fromReport);
       }
     );
   });

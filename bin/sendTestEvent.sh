@@ -2,10 +2,12 @@
 
 event_content="$1"
 
-if [ -z "$2" ]; then
+type="$2"
+
+if [ -z "$3" ]; then
   nostr_private_key="$NOSTR_PRIVATE_KEY"
 else
-  nostr_private_key="$2"
+  nostr_private_key="$3"
 fi
 
 if [ -z "$nostr_private_key" ]; then
@@ -13,7 +15,17 @@ if [ -z "$nostr_private_key" ]; then
   exit 1
 fi
 
-JSON_PAYLOAD=$(nak event -c "$event_content" --sec "$nostr_private_key" | jq -c .)
+if [[ "$type" == "report" ]]; then
+  JSON_PAYLOAD=$(nak event -c "$event_content" --sec "$nostr_private_key" -envelope | jq -c .)
+  echo "Reported event JSON Payload is: $JSON_PAYLOAD\n"
+  sleep 1
+  echo $JSON_PAYLOAD | nostcat wss://relay.damus.io
+
+  EVENT_ID=$(echo "$JSON_PAYLOAD" | jq '.[1].id'| sed 's/"//g')
+  JSON_PAYLOAD=$(nak event -c 'Hateful!'  --kind 1984 --sec "$nostr_private_key" -t e="$EVENT_ID;profanity" -t L=MOD -t l='hate;MOD;{"confidence":0.7413473725318909}'| jq -c .)
+else
+  JSON_PAYLOAD=$(nak event -c "$event_content" --sec "$nostr_private_key" | jq -c .)
+fi
 echo "JSON Payload is: $JSON_PAYLOAD"
 
 BASE64_PAYLOAD=$(echo -n "$JSON_PAYLOAD" | base64 | tr -d '\n')
