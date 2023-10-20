@@ -21,7 +21,10 @@ export class OpenAIClientPool {
       }": ${JSON.stringify(moderation)}`
     );
 
-    if (moderation.flagged) {
+    const scores = Object.values(moderation.category_scores);
+    const maxScore = Math.max(...scores);
+
+    if (moderation.flagged && maxScore >= 0.9) {
       return moderation;
     }
   }

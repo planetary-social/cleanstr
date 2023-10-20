@@ -145,7 +145,7 @@ describe('Moderation Cloud Function', () => {
     sinon.assert.notCalled(waitMillisStub);
   });
 
-  it('should publish a labeling event for a valid report event that is flagged', async () => {
+  it('should publish a reporting event for a valid report event that is flagged', async () => {
     const cloudEvent = {
       data: {
         message: {
@@ -197,9 +197,9 @@ describe('Moderation Cloud Function', () => {
 
     assert.ok(Nostr.publishNostrEvent.called);
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
-      kind: 1985,
+      kind: 1984,
       tags: [
-        ['e', flaggedNostrEvent.id, sinon.match('wss://')],
+        ['e', flaggedNostrEvent.id, 'illegal'],
         ['L', 'MOD'],
         ['l', 'IH', 'MOD', sinon.match.string],
         ['l', 'IL-har', 'MOD', sinon.match.string],

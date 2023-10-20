@@ -28,31 +28,21 @@ const ndk = new NDK({ signer, explicitRelayUrls: RELAYS });
 const connectedPromise = ndk.connect();
 
 export const REPORT_KIND = 1984;
-const LABEL_KIND = 1985;
 
 export default class Nostr {
   // Creates a NIP-32 event flagging a Nostr event.
   // See: https://github.com/nostr-protocol/nips/blob/master/32.md
-  static async publishModeration(moderatedNostrEvent, moderation, fromReport) {
+  static async publishModeration(moderatedNostrEvent, moderation) {
     // Ensure we are already connected and it was done once in the module scope
     // during cold start
     await connectedPromise;
     const user = await userPromise;
 
     let moderationEvent;
-    if (fromReport) {
-      // Create a label event referring to the reported event
-      moderationEvent = await Nostr.createLabelEvent(
-        moderatedNostrEvent,
-        moderation
-      );
-    } else {
-      // report the rest
-      moderationEvent = await Nostr.createReportEvent(
-        moderatedNostrEvent,
-        moderation
-      );
-    }
+    moderationEvent = await Nostr.createReportEvent(
+      moderatedNostrEvent,
+      moderation
+    );
 
     await Nostr.publishNostrEvent(moderationEvent);
 
@@ -73,18 +63,6 @@ export default class Nostr {
 
     await reportEvent.sign(ndk.signer);
     return reportEvent;
-  }
-
-  static async createLabelEvent(moderatedNostrEvent, moderation) {
-    const labelEvent = new NDKEvent(ndk);
-
-    labelEvent.kind = LABEL_KIND;
-
-    await this.setTags(labelEvent, moderatedNostrEvent, moderation);
-    labelEvent.content = this.createContentText(moderation);
-
-    await labelEvent.sign(ndk.signer);
-    return labelEvent;
   }
 
   static async publishNostrEvent(event) {
@@ -113,13 +91,8 @@ export default class Nostr {
   }
 
   static async setTags(moderationNostrEvent, moderatedNostrEvent, moderation) {
-    let extra;
-    if (moderationNostrEvent.kind === REPORT_KIND) {
-      extra = this.inferReportType(moderation);
-    } else {
-      extra = moderatedNostrEvent.relay.url;
-    }
-    moderationNostrEvent.tags.push(['e', moderatedNostrEvent.id, extra]);
+    const reportType = this.inferReportType(moderation);
+    moderationNostrEvent.tags.push(['e', moderatedNostrEvent.id, reportType]);
     moderationNostrEvent.tags.push(['L', 'MOD']);
 
     for (const [category, isFlagged] of Object.entries(moderation.categories)) {

@@ -19,7 +19,6 @@ functions.cloudEvent('nostrEventsPubSub', async (cloudEvent) => {
       async (event) => {
         let eventToModerate = event;
         let skipMessage = `Nostr Event ${event.id} passed moderation. Skipping`;
-        let fromReport = false;
 
         if (event.kind === REPORT_KIND) {
           eventToModerate = await Nostr.getReportedNostrEvent(event);
@@ -29,7 +28,6 @@ functions.cloudEvent('nostrEventsPubSub', async (cloudEvent) => {
             );
           }
           skipMessage = `Nostr Event ${eventToModerate.id} reported by ${event.id} passed moderation. Skipping`;
-          fromReport = true;
         }
 
         const moderation = await openAIClientPool.getModeration(
@@ -40,7 +38,7 @@ functions.cloudEvent('nostrEventsPubSub', async (cloudEvent) => {
           return console.log(skipMessage);
         }
 
-        await Nostr.publishModeration(eventToModerate, moderation, fromReport);
+        await Nostr.publishModeration(eventToModerate, moderation);
       }
     );
   });
