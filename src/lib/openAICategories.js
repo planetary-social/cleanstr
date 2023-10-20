@@ -14,7 +14,7 @@ const OPENAI_CATEGORIES = {
   harassment: {
     description:
       'Content that expresses, incites, or promotes harassing language towards any target.',
-    nip56_report_type: 'illegal',
+    nip56_report_type: 'profanity',
     nip69: 'IL-har',
   },
   'harassment/threatening': {
