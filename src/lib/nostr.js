@@ -47,7 +47,7 @@ export default class Nostr {
     await Nostr.publishNostrEvent(moderationEvent);
 
     console.log(
-      `Published moderation event ${moderationEvent.id} on ${user.npub}`
+      `Published moderation event ${moderationEvent.id} for event ${moderatedNostrEvent.id}`
     );
 
     return moderationEvent;
