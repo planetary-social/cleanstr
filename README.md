@@ -42,11 +42,9 @@ Cleanster is a Google Cloud Function node application designed to filter and mod
 
 2. **Deploy to Google Cloud**
 
-   Ensure you have the gcloud CLI set up and configured with your account credentials. Then `pnpm deploy`
+   Ensure you have the gcloud CLI set up and configured with your account credentials. Then `pnpm deploy`. This will upload the function code which expects the NOSTR_PRIVATE_KEY, which contains the secret key for the [report publishing account](npub14h23jzlyvumks4rvrz6ktk36dxfyru8qdf679k7q8uvxv0gm0vnsyqe2sh), and a comma separated OPENAI_API_CSV variable to access the OpenAI api. 3. **Monitor Output**
 
-3. **Monitor Output**
-
-   Once deployed, Cleanster will tag the Nostr events with moderation results, helping you easily identify content that may need attention.
+   Once deployed, Cleanster will tag the Nostr events with moderation results through [NIP-56](https://github.com/nostr-protocol/nips/blob/master/56.md) reports that are published to `wss://relay.nos.social`, helping you easily identify content that may need attention.
 
 ## Support
 
