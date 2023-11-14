@@ -23,6 +23,7 @@ const nostrEvent = {
   sig: '908a15e46fb4d8675bab026fc230a0e3542bfade63da02d542fb78b2a8513fcd0092619a2c8c1221e581946e0191f2af505dfdf8657a414dbca329186f009262',
 };
 
+// npub1a8ekuuuwdsrnq68s0vv9rdqxletn2j2s0hwrctqq0wggac3mh4fqth5p88
 const flaggedNostrEvent = {
   id: 'd6548d08b8bc5dff67004ca072d717d95537ee66c2321f4adc40f0149de93188',
   pubkey: 'e9f36e738e6c073068f07b1851b406fe573549507ddc3c2c007b908ee23bbd52',

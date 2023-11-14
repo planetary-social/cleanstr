@@ -140,13 +140,8 @@ export default class Nostr {
   }
 
   static createContentText(moderation) {
-    return Object.entries(moderation.categories)
-      .reduce((content, [category, isFlagged]) => {
-        if (isFlagged) {
-          content += OPENAI_CATEGORIES[category].description + '\n\n';
-        }
-        return content;
-      }, '')
-      .trim();
+    const reportType = this.inferReportType(moderation);
+    const content = `This content has been reported for ${reportType} using NIP-69 vocabulary https://github.com/nostr-protocol/nips/pull/457`;
+    return content;
   }
 }
