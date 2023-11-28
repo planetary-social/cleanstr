@@ -99,7 +99,7 @@ export default class Nostr {
       if (isFlagged) {
         moderationNostrEvent.tags.push([
           'l',
-          OPENAI_CATEGORIES[category].nip69,
+          `MOD>${OPENAI_CATEGORIES[category].nip69}`,
           'MOD',
           JSON.stringify({
             confidence: moderation.category_scores[category],

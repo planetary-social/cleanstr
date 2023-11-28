@@ -137,10 +137,10 @@ describe('Moderation Cloud Function', () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
-        ['e', flaggedNostrEvent.id, 'illegal'],
+        ['e', flaggedNostrEvent.id, 'profanity'],
         ['L', 'MOD'],
-        ['l', 'IH', 'MOD', sinon.match.string],
-        ['l', 'IL-har', 'MOD', sinon.match.string],
+        ['l', 'MOD>IH', 'MOD', sinon.match.string],
+        ['l', 'MOD>IL-har', 'MOD', sinon.match.string],
       ],
     });
     sinon.assert.notCalled(waitMillisStub);
@@ -200,10 +200,10 @@ describe('Moderation Cloud Function', () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
-        ['e', flaggedNostrEvent.id, 'illegal'],
+        ['e', flaggedNostrEvent.id, 'profanity'],
         ['L', 'MOD'],
-        ['l', 'IH', 'MOD', sinon.match.string],
-        ['l', 'IL-har', 'MOD', sinon.match.string],
+        ['l', 'MOD>IH', 'MOD', sinon.match.string],
+        ['l', 'MOD>IL-har', 'MOD', sinon.match.string],
       ],
     });
     sinon.assert.notCalled(waitMillisStub);

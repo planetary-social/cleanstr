@@ -13,9 +13,9 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "test": "c8 mocha -p -j 2 test/*.test.js --timeout=5000",
-    "test:integration": "c8 mocha -p -j 2 test/integration.test.js --timeout=5000",
-    "test:grep": "c8 mocha -p -j 2 --timeout=5000 --grep",
+    "test": "c8 mocha -j 2 test/*.test.js --timeout=5000",
+    "test:integration": "c8 mocha -j 2 test/integration.test.js --timeout=5000",
+    "test:grep": "c8 mocha -j 2 --timeout=5000 --grep",
     "test:rateLimit": "node runArtilleryTest.mjs",
     "logs": "gcloud functions logs read nodejs-moderator-function --gen2",
     "sendTestEvent": "./bin/sendTestEvent.sh",
