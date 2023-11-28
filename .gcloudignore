@@ -15,14 +15,15 @@
 #
 
 .DS\*Store
+.bin/
 .gcloudignore
 .git/
 .gitignore
 LICENSE
 README.md
+artillery-config.yaml
 coverage/
 example_openai.ts
 node_modules
-test/
-artillery-config.yaml
 runArtilleryTest.mjs
+test/
