@@ -1,13 +1,29 @@
 import OpenAI from 'openai';
 
+const MODERATED_EVENT_KINDS = [
+  1, // Kind 1: Short Text Note (free-form text notes)
+  30023, // Kind 30023: Long-form Content (articles or blog posts in Markdown)
+  30078, // Kind 30078: Application-specific Data (could contain free-form text data for apps)
+  30402, // Kind 30402: Classified Listings (descriptions for classified listings)
+  30403, // Kind 30403: Draft Classified Listings (descriptions for draft/inactive listings)
+  9802, // Kind 9802: Highlights (highlighted text portions)
+  // TODO: Delegations https://github.com/nostr-protocol/nips/blob/master/26.md
+];
+
 export class OpenAIClientPool {
+  // Creates one openAI client per key and then round robins between them for
+  // each request in a predictable event.id based way
   constructor(keys) {
     if (!keys.length) throw new Error('Keys array cannot be empty');
     this.clients = keys.map((key) => new OpenAI({ apiKey: key }));
   }
 
+  // Returns a moderation object if the event content is flagged.
   async getModeration(event) {
-    if (event.content.trim() === '') {
+    if (
+      event.content.trim() === '' ||
+      !MODERATED_EVENT_KINDS.includes(event.kind)
+    ) {
       return;
     }
 
@@ -29,6 +45,7 @@ export class OpenAIClientPool {
     }
   }
 
+  // Will select an openAI client from the pool based on the event.id.
   getClient(id) {
     let intValue;
     try {
