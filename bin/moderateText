@@ -1,0 +1,32 @@
+#!/bin/bash
+
+KEY=$OPENAI_API_KEY
+TEXT=$@
+
+# Check if the OpenAI API key is set
+if [ -z "$KEY" ]; then
+    echo "Error: OPENAI_API_KEY is not set."
+    exit 1
+fi
+
+# Check for arguments or stdin
+if [ $# -eq 0 ]; then
+    if [ -t 0 ]; then  # Check if stdin is a terminal
+        echo "No text provided. Please provide text as arguments or pipe it from stdin."
+        echo "Example usage:"
+        echo "  $0 'Your text here'"
+        echo "  echo 'Your text here' | $0"
+        exit 1
+    fi
+    read -r -d '' TEXT
+fi
+
+# Use jq to correctly format the JSON payload
+JSON_PAYLOAD=$(jq -nc --arg text "$TEXT" '{"input": $text}')
+
+RESPONSE=$(curl -s -X POST "https://api.openai.com/v1/moderations" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $KEY" \
+    -d "$JSON_PAYLOAD")
+
+echo "$RESPONSE" | jq .
