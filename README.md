@@ -22,50 +22,47 @@ Cleanster is a Google Cloud Function node application designed to filter and mod
 
 1. **Clone the Repository**
 
-   ```bash
+   \```bash
    git clone https://github.com/planetary-social/cleanster.git
    cd cleanster
-   ```
+   \```
 
 2. **Prerequisites**
 
-   - Install the Datastore emulator following these [instructions](https://cloud.google.com/datastore/docs/tools/datastore-emulator).
    - Install Dependencies with `pnpm install`
 
 ## Usage
 
-1. **Tests**
+1. **Testing Setup**
 
-   Ensure you have a `NOSTR_PRIVATE_KEY` env key set with a test account. This will be used by some integration tests.
+   - Set a `NOSTR_PRIVATE_KEY` environment variable with the private key of a test nostr account used to publish moderation reports.
+   - Run the tests with `pnpm test` to ensure everything is set up correctly.
 
-   Run the tests with `pnpm test`
+2. **Deployment to Google Cloud**
 
-2. **Deploy to Google Cloud**
+    - **Prepare Your Environment**: Ensure the Google Cloud CLI (`gcloud`) is installed and configured with your account.
+    - **Set Environment Variables**: `NOSTR_PRIVATE_KEY` for the reporting account private key, and `OPENAI_API_CSV` for your OpenAI API keys.
+    - **Deploy the Function**: Use `pnpm run deploy` to upload Cleanster to Google Cloud.
+    - **Post-Deployment**: Cleanster starts processing Nostr events and publishes moderation reports via NIP-56 on `wss://relay.nos.social`. You can change this relay to your own.
 
-   Ensure you have the gcloud CLI set up and configured with your account credentials. Then `pnpm deploy`. This will upload the function code which expects the NOSTR_PRIVATE_KEY, which contains the secret key for [Reportinator](https://njump.me/nprofile1qqs2m4gep0jxwdmg23kp3dt9mgaxnyjp7rsx5a0zm0qr7xrx85dhkfcpzemhxue69uhhyetvv9ujumn0wvh8xmmrd9skcl8vqu6), the report publishing account, and a comma separated `OPENAI_API_CSV` variable to access the OpenAI api. 
+3. **Integration with our Nostr Relay**
 
-3. **Monitor Output**
-
-   Once deployed, Cleanster will tag the Nostr events with moderation results through [NIP-56](https://github.com/nostr-protocol/nips/blob/master/56.md) reports that are published to `wss://relay.nos.social`, helping you easily identify content that may need attention.
+   - If you don't want to host your own deployment you can use our relay. Add `wss://relay.nos.social` to your Nostr client's relay list.
+   - Content flagged by Cleanster is managed by this relay and marked as kind 1984 for prompt handling.
+   - Following the [Reportinator](https://njump.me/nprofile1qqs2m4gep0jxwdmg23kp3dt9mgaxnyjp7rsx5a0zm0qr7xrx85dhkfcpzemhxue69uhhyetvv9ujumn0wvh8xmmrd9skcl8vqu6) bot in your Nostr client is essential for proper integration with Cleanster's moderation reports.
+   - Your client should properly process kind 1984 in a similar way that https://nos.social does. 
 
 ## Support
 
-If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/your-repo/cleanster/issues) or contact our support team at support@nos.social.
+For any issues or suggestions, please \[open an issue\](https://github.com/your-repo/cleanster/issues) or contact our support team at support@nos.social.
 
 ## Contributing
 
-We welcome contributions! If you'd like to contribute:
-
-1. Fork this repository.
-2. Create a new branch: `git checkout -b feature-name`.
-3. Implement your feature or bug fix.
-4. Commit your changes.
-5. Push to your branch: `git push origin feature-name`.
-6. Create a new pull request from the branch.
+We welcome contributions! To contribute, fork the repository, create a feature branch, implement your changes, commit, push to your branch, and open a pull request.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the \[LICENSE\](LICENSE) file for details.
 
 ---
 
