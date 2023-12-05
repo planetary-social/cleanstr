@@ -27,3 +27,4 @@ example_openai.ts
 node_modules
 runArtilleryTest.mjs
 test/
+.envrc
