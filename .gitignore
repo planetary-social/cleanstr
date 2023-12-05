@@ -13,4 +13,5 @@ node_modules
 Thumbs.db
 
 .gcloudignore
+.envrc
 
