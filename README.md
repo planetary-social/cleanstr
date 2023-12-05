@@ -36,13 +36,15 @@ Cleanster is a Google Cloud Function node application designed to filter and mod
 
 1. **Tests**
 
-   Ensure you have a `NOSTR_PRIVATE_KEY` env key set with a test account and then start the datastore emulator with `pnpm startDataStoreEmulator`.
+   Ensure you have a `NOSTR_PRIVATE_KEY` env key set with a test account. This will be used by some integration tests.
 
-   In another terminal run the tests with `pnpm test`
+   Run the tests with `pnpm test`
 
 2. **Deploy to Google Cloud**
 
-   Ensure you have the gcloud CLI set up and configured with your account credentials. Then `pnpm deploy`. This will upload the function code which expects the NOSTR_PRIVATE_KEY, which contains the secret key for the [report publishing account](npub14h23jzlyvumks4rvrz6ktk36dxfyru8qdf679k7q8uvxv0gm0vnsyqe2sh), and a comma separated OPENAI_API_CSV variable to access the OpenAI api. 3. **Monitor Output**
+   Ensure you have the gcloud CLI set up and configured with your account credentials. Then `pnpm deploy`. This will upload the function code which expects the NOSTR_PRIVATE_KEY, which contains the secret key for [Reportinator](https://njump.me/nprofile1qqs2m4gep0jxwdmg23kp3dt9mgaxnyjp7rsx5a0zm0qr7xrx85dhkfcpzemhxue69uhhyetvv9ujumn0wvh8xmmrd9skcl8vqu6), the report publishing account, and a comma separated `OPENAI_API_CSV` variable to access the OpenAI api. 
+
+3. **Monitor Output**
 
    Once deployed, Cleanster will tag the Nostr events with moderation results through [NIP-56](https://github.com/nostr-protocol/nips/blob/master/56.md) reports that are published to `wss://relay.nos.social`, helping you easily identify content that may need attention.
 
