@@ -22,10 +22,10 @@ Cleanster is a Google Cloud Function node application designed to filter and mod
 
 1. **Clone the Repository**
 
-   \```bash
+   ```bash
    git clone https://github.com/planetary-social/cleanster.git
    cd cleanster
-   \```
+   ```
 
 2. **Prerequisites**
 
@@ -54,7 +54,7 @@ Cleanster is a Google Cloud Function node application designed to filter and mod
 
 ## Support
 
-For any issues or suggestions, please \[open an issue\](https://github.com/your-repo/cleanster/issues) or contact our support team at support@nos.social.
+For any issues or suggestions, please [open an issue](https://github.com/your-repo/cleanster/issues) or contact our support team at support@nos.social.
 
 ## Contributing
 
@@ -62,8 +62,4 @@ We welcome contributions! To contribute, fork the repository, create a feature b
 
 ## License
 
-This project is licensed under the MIT License. See the \[LICENSE\](LICENSE) file for details.
-
----
-
-Thank you for using or considering Cleanster, a powerful tool in ensuring a safer Nostr content experience.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
