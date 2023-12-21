@@ -67,6 +67,39 @@ describe('Moderation Cloud Function', () => {
   });
 
   it('should do nothing for a valid event that is not flagged', async () => {
+    sinon.stub(OpenAI.Moderations.prototype, 'create').resolves({
+      results: [
+        {
+          flagged: false,
+          categories: {
+            sexual: false,
+            hate: false,
+            harassment: false,
+            'self-harm': false,
+            'sexual/minors': false,
+            'hate/threatening': false,
+            'violence/graphic': false,
+            'self-harm/intent': false,
+            'self-harm/instructions': false,
+            'harassment/threatening': false,
+            violence: false,
+          },
+          category_scores: {
+            sexual: 0.0008905100985430181,
+            hate: 0.000,
+            harassment: 0.000,
+            'self-harm': 0.000020246614440111443,
+            'sexual/minors': 0.000046280372771434486,
+            'hate/threatening': 0.000006213878805283457,
+            'violence/graphic': 0.000014815827853453811,
+            'self-harm/intent': 0.00004021823042421602,
+            'self-harm/instructions': 0.000009193716323352419,
+            'harassment/threatening': 0.0007776615675538778,
+            violence: 0.00004086320041096769,
+          },
+        },
+      ],
+    });
     sinon.stub(Nostr, 'publishModeration');
     const cloudEvent = {
       data: {
