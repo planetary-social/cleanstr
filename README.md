@@ -1,3 +1,6 @@
+[![Node.js CI](https://github.com/planetary-social/cleanstr/actions/workflows/node.js.yml/badge.svg)](https://github.com/planetary-social/cleanstr/actions/workflows/node.js.yml)
+[![codecov](https://codecov.io/gh/planetary-social/cleanstr/graph/badge.svg?token=QN61WNS6D5)](https://codecov.io/gh/planetary-social/cleanstr)
+
 # Cleanster - Nostr Content Moderation with OpenAI
 
 Cleanster is a Google Cloud Function node application designed to filter and moderate content from Nostr using OpenAI's moderation service. With the surge in user-generated content, maintaining the quality and safety of shared data is paramount. Cleanster seamlessly takes in a pubsub feed of Nostr content, checks it, and generates Nostr events tagging the results.
