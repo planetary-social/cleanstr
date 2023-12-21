@@ -47,6 +47,7 @@ jobs:
       - name: Run tests
         env:
           NOSTR_PRIVATE_KEY: ${{ secrets.NOSTR_PRIVATE_KEY }}
+          OPENAI_API_CSV: anyvalueworksformockedtests
         run: pnpm test
 
       - name: Upload coverage to Codecov
