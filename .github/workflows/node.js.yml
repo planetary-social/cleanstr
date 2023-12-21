@@ -45,6 +45,8 @@ jobs:
         run: pnpm install
 
       - name: Run tests
+        env:
+          NOSTR_PRIVATE_KEY: ${{ secrets.NOSTR_PRIVATE_KEY }}
         run: pnpm test
 
       - name: Upload coverage to Codecov
