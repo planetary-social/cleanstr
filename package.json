@@ -10,7 +10,7 @@
     "url": "https://github.com:planetary-social/cleanstr.git"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": "~20"
   },
   "scripts": {
     "test": "c8 --reporter=lcov --check-coverage --lines 80 --functions 80 --branches 80 --statements 80 mocha --timeout=5000 --exit",
