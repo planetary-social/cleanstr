@@ -1,4 +1,4 @@
-const { WebClient } = require("@slack/web-api");
+import { WebClient } from "@slack/web-api";
 
 if (!process.env.SLACK_TOKEN) {
   throw new Error("SLACK_TOKEN environment variable is required");
@@ -13,16 +13,18 @@ const channelId = process.env.CHANNEL_ID;
 const web = new WebClient(token);
 export default class Slack {
   static async postManualVerification(reportRequest) {
-    // console.log(
-    //   `TODO: Implement Slack.postManualVerification.\n
-    //    Event payload: ${JSON.stringify(reportRequest.reportedEvent)}\n
-    //    Reporter pubkey: ${reportRequest.reporterPubkey}\n
-    //    Reporter text: ${reportRequest.reporterText}`
-    // );
     try {
       const result = await web.chat.postMessage({
         channel: channelId,
-        text: "This is a sample message with buttons",
+        text: `Pubkey ${
+          reportRequest.reporterPubkey
+        } reported an event:\n\`\`\`\n${
+          reportRequest.reporterText
+        }\`\`\`\nEvent to evaluate:\n\`\`\`\n${JSON.stringify(
+          reportRequest.reportedEvent,
+          null,
+          2
+        )}\n\`\`\``,
         blocks: [
           {
             type: "section",
@@ -56,7 +58,10 @@ export default class Slack {
           },
         ],
       });
-      console.log(result);
+
+      console.log(
+        `Sent event ${reportRequest.reportedEvent.id} to Slack for manual evaluation.`
+      );
     } catch (error) {
       console.error(error);
     }
