@@ -54,8 +54,8 @@ const reportNostrEvent = {
   sig: "df77b254f086ba6065ee2ff828601c84836bf6df13a59e0dc49e01b828e3da08cd184c18c26e85736f17ff39241eef894ceae25de1402b2c5ff5432ec656908d",
 };
 
-describe("Moderation Cloud Function", () => {
-  beforeEach(async function () {
+describe("Moderation Cloud Function", async () => {
+  beforeEach(async () => {
     sinon.spy(console, "error");
     sinon.spy(console, "log");
     sinon.stub(Nostr, "publishNostrEvent").returns(Promise.resolve());
@@ -64,7 +64,7 @@ describe("Moderation Cloud Function", () => {
     sinon.stub(Datastore.prototype, "save").resolves();
   });
 
-  afterEach(function () {
+  afterEach(async () => {
     sinon.restore();
   });
 
@@ -114,8 +114,8 @@ describe("Moderation Cloud Function", () => {
     const nostrEventsPubSub = getFunction("nostrEventsPubSub");
     await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(Nostr.publishModeration.notCalled);
-    assert.ok(Slack.postManualVerification.notCalled);
+    sinon.assert.notCalled(Nostr.publishNostrEvent);
+    sinon.assert.notCalled(Slack.postManualVerification);
   });
 
   it("should send to Slack a valid event that is not flagged sent from the reportinator server", async () => {
@@ -158,8 +158,9 @@ describe("Moderation Cloud Function", () => {
         message: {
           data: Buffer.from(
             JSON.stringify({
-              nostrEvent,
-              userReportRequest: {},
+              reportedEvent: nostrEvent,
+              reporterPubkey:
+                "npub1a8ekuuuwdsrnq68s0vv9rdqxletn2j2s0hwrctqq0wggac3mh4fqth5p88",
             })
           ).toString("base64"),
         },
@@ -169,8 +170,8 @@ describe("Moderation Cloud Function", () => {
     const nostrEventsPubSub = getFunction("nostrEventsPubSub");
     await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(Nostr.publishModeration.notCalled);
-    assert.ok(Slack.postManualVerification.called);
+    sinon.assert.notCalled(Nostr.publishNostrEvent);
+    sinon.assert.called(Slack.postManualVerification);
   });
 
   it("should publish a report event for a valid event that is flagged coming from reportinator server", async () => {
@@ -179,8 +180,7 @@ describe("Moderation Cloud Function", () => {
         message: {
           data: Buffer.from(
             JSON.stringify({
-              nostrEvent: flaggedNostrEvent,
-              userReportRequest: {},
+              reportedEvent: flaggedNostrEvent,
             })
           ).toString("base64"),
         },
@@ -226,7 +226,6 @@ describe("Moderation Cloud Function", () => {
     const nostrEventsPubSub = getFunction("nostrEventsPubSub");
     await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(Nostr.publishNostrEvent.called);
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
@@ -238,7 +237,7 @@ describe("Moderation Cloud Function", () => {
     });
     sinon.assert.notCalled(waitMillisStub);
 
-    assert.ok(Slack.postManualVerification.notCalled);
+    sinon.assert.notCalled(Slack.postManualVerification);
   });
 
   it("should publish a report event for a valid event that is flagged", async () => {
@@ -291,7 +290,7 @@ describe("Moderation Cloud Function", () => {
     const nostrEventsPubSub = getFunction("nostrEventsPubSub");
     await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(Nostr.publishNostrEvent.called);
+    sinon.assert.calledOnce(Nostr.publishNostrEvent);
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
@@ -301,9 +300,9 @@ describe("Moderation Cloud Function", () => {
         ["l", "MOD>IL-har", "MOD", sinon.match.string],
       ],
     });
-    sinon.assert.notCalled(waitMillisStub);
 
-    assert.ok(Slack.postManualVerification.notCalled);
+    sinon.assert.notCalled(waitMillisStub);
+    sinon.assert.notCalled(Slack.postManualVerification);
   });
 
   it("should publish a reporting event for a valid report event that is flagged coming from reportinator server", async () => {
@@ -312,8 +311,7 @@ describe("Moderation Cloud Function", () => {
         message: {
           data: Buffer.from(
             JSON.stringify({
-              nostrEvent: reportNostrEvent,
-              userReportRequest: {},
+              reportedEvent: reportNostrEvent,
             })
           ).toString("base64"),
         },
@@ -359,7 +357,6 @@ describe("Moderation Cloud Function", () => {
     const nostrEventsPubSub = getFunction("nostrEventsPubSub");
     await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(Nostr.publishNostrEvent.called);
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
@@ -370,10 +367,10 @@ describe("Moderation Cloud Function", () => {
       ],
     });
     sinon.assert.notCalled(waitMillisStub);
-    assert.ok(Slack.postManualVerification.notCalled);
+    sinon.assert.notCalled(Slack.postManualVerification);
   });
 
-  it("should publish a reporting event for a valid report event that is flagged coming from reportinator server", async () => {
+  it("should publish a reporting event for a valid report event that is flagged", async () => {
     const cloudEvent = {
       data: {
         message: {
@@ -423,7 +420,6 @@ describe("Moderation Cloud Function", () => {
     const nostrEventsPubSub = getFunction("nostrEventsPubSub");
     await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(Nostr.publishNostrEvent.called);
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
@@ -434,7 +430,7 @@ describe("Moderation Cloud Function", () => {
       ],
     });
     sinon.assert.notCalled(waitMillisStub);
-    assert.ok(Slack.postManualVerification.notCalled);
+    sinon.assert.notCalled(Slack.postManualVerification);
   });
 
   it("should detect and invalid event", async () => {
@@ -453,9 +449,9 @@ describe("Moderation Cloud Function", () => {
     const nostrEventsPubSub = getFunction("nostrEventsPubSub");
     await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(console.error.calledWith("Invalid Nostr Event"));
-    assert.ok(Nostr.publishNostrEvent.notCalled);
-    assert.ok(Slack.postManualVerification.notCalled);
+    sinon.assert.calledWith(console.error, "Invalid Nostr Event");
+    sinon.assert.notCalled(Nostr.publishNostrEvent);
+    sinon.assert.notCalled(Slack.postManualVerification);
   });
 
   it("should detect and invalid event coming from reportinator server", async () => {
@@ -477,29 +473,29 @@ describe("Moderation Cloud Function", () => {
     const nostrEventsPubSub = getFunction("nostrEventsPubSub");
     await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(console.error.calledWith("Invalid Nostr Event"));
-    assert.ok(Nostr.publishNostrEvent.notCalled);
-    assert.ok(Slack.postManualVerification.notCalled);
+    sinon.assert.calledWith(console.error, "Invalid Nostr Event");
+    sinon.assert.notCalled(Nostr.publishNostrEvent);
+    sinon.assert.notCalled(Slack.postManualVerification);
   });
 
-  xit("should detect and invalid signature", async () => {
-    const nEvent = { ...nostrEvent };
-    nEvent.id =
-      "1111c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a65";
-    const cloudEvent = {
-      data: {
-        message: {
-          data: Buffer.from(JSON.stringify(nEvent)).toString("base64"),
-        },
-      },
-    };
+  // xit("should detect and invalid signature", async () => {
+  //   const nEvent = { ...nostrEvent };
+  //   nEvent.id =
+  //     "1111c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a65";
+  //   const cloudEvent = {
+  //     data: {
+  //       message: {
+  //         data: Buffer.from(JSON.stringify(nEvent)).toString("base64"),
+  //       },
+  //     },
+  //   };
 
-    const nostrEventsPubSub = getFunction("nostrEventsPubSub");
-    await nostrEventsPubSub(cloudEvent);
+  //   const nostrEventsPubSub = getFunction("nostrEventsPubSub");
+  //   await nostrEventsPubSub(cloudEvent);
 
-    assert.ok(console.error.calledWith("Invalid Nostr Event Signature"));
-    assert.ok(Nostr.publishNostrEvent.notCalled);
-  });
+  //   assert.ok(console.error.calledWith("Invalid Nostr Event Signature"));
+  //   assert.ok(Nostr.publishNostrEvent.notCalled);
+  // });
 
   it("should add jitter pause after a rate limit error", async () => {
     const nEvent = { ...nostrEvent };
@@ -528,8 +524,8 @@ describe("Moderation Cloud Function", () => {
       );
     });
 
-    assert.ok(Nostr.publishNostrEvent.notCalled);
-    assert.ok(Slack.postManualVerification.notCalled);
+    sinon.assert.notCalled(Nostr.publishNostrEvent);
+    sinon.assert.notCalled(Slack.postManualVerification);
 
     sinon.assert.calledWithMatch(
       waitMillisStub,

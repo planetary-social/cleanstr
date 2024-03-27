@@ -6,14 +6,16 @@ import RateLimiting from "./src/lib/rateLimiting.js";
 import Nostr, { REPORT_KIND } from "./src/lib/nostr.js";
 import Slack from "./src/lib/slack.js";
 import DuplicationHandling from "./src/lib/duplicationHandling.js";
+import ReportRequest from "./src/lib/reportRequest.js";
 
 functions.cloudEvent("nostrEventsPubSub", async (cloudEvent) => {
   //The nostr event can either directly be the object or be encapsulated within
-  //a nostrEvent key, if present. A nostrEvent key indicates a user-initiated
-  //manual report request originating from the reportinator server. These events
-  //require Slack-based verification, except when they get auto-flagged."
-  const [nostrEventJson, userReportRequest] = getJSONFromCloudEvent(cloudEvent);
-  const nostrEvent = Nostr.getVerifiedEvent(nostrEventJson);
+  //a reportedEvent key, if present. A reportedEvent key indicates a
+  //user-initiated manual report request originating from the reportinator
+  //server. These events require Slack-based verification, except when they get
+  //auto-flagged. They also include a test and a pubkey of the reporter user.
+  const reportRequest = ReportRequest.fromCloudEvent(cloudEvent);
+  const nostrEvent = Nostr.getVerifiedEvent(reportRequest.reportedEvent);
 
   if (!nostrEvent) {
     return;
@@ -41,15 +43,12 @@ functions.cloudEvent("nostrEventsPubSub", async (cloudEvent) => {
         );
 
         if (!moderation) {
-          if (!userReportRequest) {
+          if (!reportRequest.reporterPubkey) {
             console.log(skipMessage);
             return;
           }
 
-          await Slack.postManualVerification(nostrEventJson, userReportRequest);
-          console.log(
-            `Event ${eventToModerate.id} reported by ${userReportRequest.pubkey} not flagged. Sending to Slack`
-          );
+          await Slack.postManualVerification(reportRequest);
           return;
         }
 
@@ -58,15 +57,3 @@ functions.cloudEvent("nostrEventsPubSub", async (cloudEvent) => {
     );
   });
 });
-
-function getJSONFromCloudEvent(cloudEvent) {
-  const data = cloudEvent.data.message.data;
-  const jsonString = data ? Buffer.from(data, "base64").toString() : "{}";
-  const json = JSON.parse(jsonString);
-
-  if (json?.userReportRequest) {
-    return [json?.nostrEvent, json.userReportRequest];
-  }
-
-  return [json, null];
-}

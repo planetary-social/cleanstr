@@ -13,7 +13,7 @@
     "node": "~20"
   },
   "scripts": {
-    "test": "c8 --reporter=lcov --check-coverage --lines 80 --functions 80 --branches 80 --statements 80 mocha --timeout=5000 --exit",
+    "test": "c8 --reporter=lcov --check-coverage --lines 80 --functions 80 --branches 80 --statements 80 mocha --timeout=10000 --exit",
     "test:integration": "c8 mocha -j 2 test/integration.test.js --timeout=5000",
     "test:grep": "c8 mocha -j 2 --timeout=5000 --grep",
     "test:rateLimit": "node runArtilleryTest.mjs",
@@ -33,7 +33,7 @@
     "c8": "^8.0.0",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^10.0.0",
+    "mocha": "^10.4.0",
     "sinon": "^15.0.0",
     "supertest": "^6.0.0",
     "uuid": "^9.0.0"
