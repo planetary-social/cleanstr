@@ -1,21 +1,21 @@
-import NDK, { NDKEvent, NDKPrivateKeySigner } from '@nostr-dev-kit/ndk';
-import { validateEvent, verifySignature } from 'nostr-tools';
-import OPENAI_CATEGORIES from './openAICategories.js';
-import { WebSocket } from 'ws';
+import NDK, { NDKEvent, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
+import { validateEvent, verifySignature } from "nostr-tools";
+import OPENAI_CATEGORIES from "./openAICategories.js";
+import { WebSocket } from "ws";
 
 if (!process.env.NOSTR_PRIVATE_KEY) {
-  throw new Error('NOSTR_PRIVATE_KEY environment variable is required');
+  throw new Error("NOSTR_PRIVATE_KEY environment variable is required");
 }
 
 // Hack to be able to have a global WebSocket object in Google Cloud Functions
 global.WebSocket = WebSocket;
 
 const RELAYS = [
-  'wss://relay.nos.social',
-  'wss://relay.damus.io',
-  'wss://relay.nostr.band',
-  'wss://relayable.org',
-  'wss://nostr.wine',
+  "wss://relay.nos.social",
+  "wss://relay.damus.io",
+  "wss://relay.nostr.band",
+  "wss://relayable.org",
+  "wss://nostr.wine",
 ];
 
 const signer = new NDKPrivateKeySigner(process.env.NOSTR_PRIVATE_KEY);
@@ -69,12 +69,9 @@ export default class Nostr {
     await event.publish();
   }
 
-  static getVerifiedEvent(data) {
-    const eventJSON = data ? Buffer.from(data, 'base64').toString() : '{}';
-    const event = JSON.parse(eventJSON);
-
+  static getVerifiedEvent(event) {
     if (!validateEvent(event)) {
-      console.error('Invalid Nostr Event');
+      console.error("Invalid Nostr Event");
       return;
     }
 
@@ -92,15 +89,15 @@ export default class Nostr {
 
   static async setTags(moderationNostrEvent, moderatedNostrEvent, moderation) {
     const reportType = this.inferReportType(moderation);
-    moderationNostrEvent.tags.push(['e', moderatedNostrEvent.id, reportType]);
-    moderationNostrEvent.tags.push(['L', 'MOD']);
+    moderationNostrEvent.tags.push(["e", moderatedNostrEvent.id, reportType]);
+    moderationNostrEvent.tags.push(["L", "MOD"]);
 
     for (const [category, isFlagged] of Object.entries(moderation.categories)) {
       if (isFlagged) {
         moderationNostrEvent.tags.push([
-          'l',
+          "l",
           `MOD>${OPENAI_CATEGORIES[category].nip69}`,
-          'MOD',
+          "MOD",
           JSON.stringify({
             confidence: moderation.category_scores[category],
           }),
@@ -110,7 +107,7 @@ export default class Nostr {
   }
 
   static async getReportedNostrEvent(reportNostrEvent) {
-    const reportedNostrEventId = reportNostrEvent.tagValue('e');
+    const reportedNostrEventId = reportNostrEvent.tagValue("e");
     const reportedNostrEvent = await ndk.fetchEvent({
       ids: [reportedNostrEventId],
     });
