@@ -462,8 +462,9 @@ describe("Moderation Cloud Function", async () => {
         message: {
           data: Buffer.from(
             JSON.stringify({
-              nostrEvent: invalidNostrEvent,
-              userReportRequest: {},
+              reportedEvent: invalidNostrEvent,
+              reporterPubkey:
+                "npub1a8ekuuuwdsrnq68s0vv9rdqxletn2j2s0hwrctqq0wggac3mh4fqth5p88",
             })
           ).toString("base64"),
         },
