@@ -69,7 +69,6 @@ export default class Slack {
               elements: [
                 {
                   type: "text",
-                  style: "code",
                   text: JSON.stringify(reportRequest.reportedEvent, null, 2),
                 },
               ],
