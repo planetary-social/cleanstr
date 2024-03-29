@@ -98,7 +98,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "Skip",
               },
-              value: "skip",
+              value: "npub123",
               action_id: "skip",
             },
             {
@@ -107,8 +107,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "hate",
               },
-              value:
-                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"IH"}',
+              value: "npub123",
               action_id: "hate",
             },
             {
@@ -117,8 +116,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "hate/threatening",
               },
-              value:
-                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"HC-bhd"}',
+              value: "npub123",
               action_id: "hate/threatening",
             },
             {
@@ -127,8 +125,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "harassment",
               },
-              value:
-                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"IL-har"}',
+              value: "npub123",
               action_id: "harassment",
             },
             {
@@ -137,8 +134,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "harassment/threatening",
               },
-              value:
-                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"HC-bhd"}',
+              value: "npub123",
               action_id: "harassment/threatening",
             },
             {
@@ -147,8 +143,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "self-harm",
               },
-              value:
-                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"HC-bhd"}',
+              value: "npub123",
               action_id: "self-harm",
             },
             {
@@ -157,8 +152,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "self-harm/intent",
               },
-              value:
-                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"HC-bhd"}',
+              value: "npub123",
               action_id: "self-harm/intent",
             },
             {
@@ -167,8 +161,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "self-harm/instructions",
               },
-              value:
-                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"HC-bhd"}',
+              value: "npub123",
               action_id: "self-harm/instructions",
             },
             {
@@ -177,8 +170,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "sexual",
               },
-              value:
-                '{"reporterPubkey":"npub123","nip56_report_type":"nudity","nip69":"NS"}',
+              value: "npub123",
               action_id: "sexual",
             },
             {
@@ -187,8 +179,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "sexual/minors",
               },
-              value:
-                '{"reporterPubkey":"npub123","nip56_report_type":"illegal","nip69":"IL-csa"}',
+              value: "npub123",
               action_id: "sexual/minors",
             },
             {
@@ -197,8 +188,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "violence",
               },
-              value:
-                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"VI"}',
+              value: "npub123",
               action_id: "violence",
             },
             {
@@ -207,8 +197,7 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "violence/graphic",
               },
-              value:
-                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"VI"}',
+              value: "npub123",
               action_id: "violence/graphic",
             },
           ],

@@ -38,11 +38,7 @@ export default class Slack {
             type: "plain_text",
             text: category,
           },
-          value: JSON.stringify({
-            reporterPubkey: reportRequest.reporterPubkey,
-            nip56_report_type: categoryData.nip56_report_type,
-            nip69: categoryData.nip69,
-          }),
+          value: reportRequest.reporterPubkey,
           action_id: category,
         };
       }
@@ -54,7 +50,7 @@ export default class Slack {
         type: "plain_text",
         text: "Skip",
       },
-      value: "skip",
+      value: reportRequest.reporterPubkey,
       action_id: "skip",
     });
 
