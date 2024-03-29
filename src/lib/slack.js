@@ -17,7 +17,7 @@ export default class Slack {
   static async postManualVerification(reportRequest) {
     try {
       const messagePayload = this.createSlackMessagePayload(reportRequest);
-      const result = await web.chat.postMessage();
+      await web.chat.postMessage(messagePayload);
 
       console.log(
         `Sent event ${reportRequest.reportedEvent.id} to Slack for manual evaluation.`
@@ -28,7 +28,7 @@ export default class Slack {
   }
 
   static createSlackMessagePayload(reportRequest) {
-    const longText = `Pubkey ${reportRequest.reporterPubkey} reported an event:\n\`\`\`\n${reportRequest.reporterText}\n\`\`\``;
+    const longText = `Pubkey \`${reportRequest.reporterPubkey}\` reported an event:\n\`\`\`\n${reportRequest.reporterText}\n\`\`\``;
 
     const shortText = `${reportRequest.reporterPubkey} reported event ${reportRequest.reportedEvent.id}`;
 
@@ -48,6 +48,16 @@ export default class Slack {
         };
       }
     );
+
+    elements.unshift({
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: "Skip",
+      },
+      value: "skip",
+      action_id: "skip",
+    });
 
     return {
       channel: channelId,
