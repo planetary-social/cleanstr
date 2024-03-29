@@ -46,7 +46,7 @@ describe("Slack", () => {
     const slackMessagePayload = Slack.createSlackMessagePayload(reportRequest);
 
     expect(slackMessagePayload).to.be.eql({
-      channel: "bar",
+      channel: "something",
       text: "New Nostr Event to moderate requested by pubkey `npub123`",
       blocks: [
         {
