@@ -47,14 +47,30 @@ describe("Slack", () => {
 
     expect(slackMessagePayload).to.be.eql({
       channel: "bar",
-      text: "npub123 reported event 12",
+      text: "New Nostr Event to moderate requested by pubkey `npub123`",
       blocks: [
         {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "Pubkey npub123 reported an event:\n```\nundefined\n```",
+            text: "New Nostr Event to moderate requested by pubkey `npub123`",
           },
+        },
+        {
+          type: "rich_text",
+          block_id: "reporterText",
+          elements: [
+            {
+              type: "rich_text_preformatted",
+              elements: [
+                {
+                  text: "No text provided by reporter",
+                  type: "text",
+                },
+              ],
+              border: 0,
+            },
+          ],
         },
         {
           type: "rich_text",
@@ -65,7 +81,7 @@ describe("Slack", () => {
               elements: [
                 {
                   type: "text",
-                  style: "code",
+                  style: { code: true },
                   text: '{\n  "id": "12",\n  "pubkey": "34",\n  "created_at": 1673347337,\n  "kind": 1,\n  "content": "Foobar",\n  "tags": [\n    [\n      "e",\n      "56"\n    ],\n    [\n      "p",\n      "78"\n    ]\n  ],\n  "sig": "91"\n}',
                 },
               ],
@@ -78,68 +94,121 @@ describe("Slack", () => {
           elements: [
             {
               type: "button",
-              text: { type: "plain_text", text: "hate" },
-              value: '["other","IH"]',
+              text: {
+                type: "plain_text",
+                text: "Skip",
+              },
+              value: "skip",
+              action_id: "skip",
+            },
+            {
+              type: "button",
+              text: {
+                type: "plain_text",
+                text: "hate",
+              },
+              value:
+                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"IH"}',
               action_id: "hate",
             },
             {
               type: "button",
-              text: { type: "plain_text", text: "hate/threatening" },
-              value: '["other","HC-bhd"]',
+              text: {
+                type: "plain_text",
+                text: "hate/threatening",
+              },
+              value:
+                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"HC-bhd"}',
               action_id: "hate/threatening",
             },
             {
               type: "button",
-              text: { type: "plain_text", text: "harassment" },
-              value: '["other","IL-har"]',
+              text: {
+                type: "plain_text",
+                text: "harassment",
+              },
+              value:
+                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"IL-har"}',
               action_id: "harassment",
             },
             {
               type: "button",
-              text: { type: "plain_text", text: "harassment/threatening" },
-              value: '["other","HC-bhd"]',
+              text: {
+                type: "plain_text",
+                text: "harassment/threatening",
+              },
+              value:
+                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"HC-bhd"}',
               action_id: "harassment/threatening",
             },
             {
               type: "button",
-              text: { type: "plain_text", text: "self-harm" },
-              value: '["other","HC-bhd"]',
+              text: {
+                type: "plain_text",
+                text: "self-harm",
+              },
+              value:
+                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"HC-bhd"}',
               action_id: "self-harm",
             },
             {
               type: "button",
-              text: { type: "plain_text", text: "self-harm/intent" },
-              value: '["other","HC-bhd"]',
+              text: {
+                type: "plain_text",
+                text: "self-harm/intent",
+              },
+              value:
+                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"HC-bhd"}',
               action_id: "self-harm/intent",
             },
             {
               type: "button",
-              text: { type: "plain_text", text: "self-harm/instructions" },
-              value: '["other","HC-bhd"]',
+              text: {
+                type: "plain_text",
+                text: "self-harm/instructions",
+              },
+              value:
+                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"HC-bhd"}',
               action_id: "self-harm/instructions",
             },
             {
               type: "button",
-              text: { type: "plain_text", text: "sexual" },
-              value: '["nudity","NS"]',
+              text: {
+                type: "plain_text",
+                text: "sexual",
+              },
+              value:
+                '{"reporterPubkey":"npub123","nip56_report_type":"nudity","nip69":"NS"}',
               action_id: "sexual",
             },
             {
               type: "button",
-              text: { type: "plain_text", text: "sexual/minors" },
-              value: '["illegal","IL-csa"]',
+              text: {
+                type: "plain_text",
+                text: "sexual/minors",
+              },
+              value:
+                '{"reporterPubkey":"npub123","nip56_report_type":"illegal","nip69":"IL-csa"}',
               action_id: "sexual/minors",
             },
             {
               type: "button",
-              text: { type: "plain_text", text: "violence" },
-              value: '["other","VI"]',
+              text: {
+                type: "plain_text",
+                text: "violence",
+              },
+              value:
+                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"VI"}',
               action_id: "violence",
             },
             {
               type: "button",
-              text: { type: "plain_text", text: "violence/graphic" },
-              value: '["other","VI"]',
+              text: {
+                type: "plain_text",
+                text: "violence/graphic",
+              },
+              value:
+                '{"reporterPubkey":"npub123","nip56_report_type":"other","nip69":"VI"}',
               action_id: "violence/graphic",
             },
           ],

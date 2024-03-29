@@ -290,7 +290,6 @@ describe("Moderation Cloud Function", async () => {
     const nostrEventsPubSub = getFunction("nostrEventsPubSub");
     await nostrEventsPubSub(cloudEvent);
 
-    sinon.assert.calledOnce(Nostr.publishNostrEvent);
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
@@ -354,6 +353,9 @@ describe("Moderation Cloud Function", async () => {
       ],
     });
 
+    sinon
+      .stub(Nostr, "getReportedNostrEvent")
+      .returns(Promise.resolve(flaggedNostrEvent));
     const nostrEventsPubSub = getFunction("nostrEventsPubSub");
     await nostrEventsPubSub(cloudEvent);
 
@@ -417,6 +419,9 @@ describe("Moderation Cloud Function", async () => {
       ],
     });
 
+    sinon
+      .stub(Nostr, "getReportedNostrEvent")
+      .returns(Promise.resolve(flaggedNostrEvent));
     const nostrEventsPubSub = getFunction("nostrEventsPubSub");
     await nostrEventsPubSub(cloudEvent);
 

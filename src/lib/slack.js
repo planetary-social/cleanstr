@@ -28,9 +28,7 @@ export default class Slack {
   }
 
   static createSlackMessagePayload(reportRequest) {
-    const longText = `Pubkey \`${reportRequest.reporterPubkey}\` reported an event:\n\`\`\`\n${reportRequest.reporterText}\n\`\`\``;
-
-    const shortText = `${reportRequest.reporterPubkey} reported event ${reportRequest.reportedEvent.id}`;
+    const text = `New Nostr Event to moderate requested by pubkey \`${reportRequest.reporterPubkey}\``;
 
     const elements = Object.entries(OPENAI_CATEGORIES).map(
       ([category, categoryData]) => {
@@ -40,10 +38,11 @@ export default class Slack {
             type: "plain_text",
             text: category,
           },
-          value: JSON.stringify([
-            categoryData.nip56_report_type,
-            categoryData.nip69,
-          ]),
+          value: JSON.stringify({
+            reporterPubkey: reportRequest.reporterPubkey,
+            nip56_report_type: categoryData.nip56_report_type,
+            nip69: categoryData.nip69,
+          }),
           action_id: category,
         };
       }
@@ -61,14 +60,32 @@ export default class Slack {
 
     return {
       channel: channelId,
-      text: shortText,
+      text,
       blocks: [
         {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: longText,
+            text,
           },
+        },
+        {
+          type: "rich_text",
+          block_id: "reporterText",
+          elements: [
+            {
+              type: "rich_text_preformatted",
+              elements: [
+                {
+                  type: "text",
+                  text:
+                    reportRequest.reporterText ||
+                    "No text provided by reporter",
+                },
+              ],
+              border: 0,
+            },
+          ],
         },
         {
           type: "rich_text",
@@ -79,6 +96,7 @@ export default class Slack {
               elements: [
                 {
                   type: "text",
+                  style: { code: true },
                   text: JSON.stringify(reportRequest.reportedEvent, null, 2),
                 },
               ],
