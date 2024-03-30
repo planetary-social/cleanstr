@@ -45,7 +45,7 @@ const reportNostrEvent = {
     [
       "e",
       "d6548d08b8bc5dff67004ca072d717d95537ee66c2321f4adc40f0149de93188",
-      "other",
+      "spam",
     ],
     ["L", "MOD"],
     ["l", "hate", "MOD", '{"confidence":0.7413473725318909}'],
@@ -229,7 +229,8 @@ describe("Moderation Cloud Function", async () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
-        ["e", flaggedNostrEvent.id, "other"],
+        ["p", flaggedNostrEvent.pubkey, "spam"],
+        ["e", flaggedNostrEvent.id, "spam"],
         ["L", "MOD"],
         ["l", "MOD>IH", "MOD", sinon.match.string],
         ["l", "MOD>IL-har", "MOD", sinon.match.string],
@@ -293,7 +294,8 @@ describe("Moderation Cloud Function", async () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
-        ["e", flaggedNostrEvent.id, "other"],
+        ["p", flaggedNostrEvent.pubkey, "spam"],
+        ["e", flaggedNostrEvent.id, "spam"],
         ["L", "MOD"],
         ["l", "MOD>IH", "MOD", sinon.match.string],
         ["l", "MOD>IL-har", "MOD", sinon.match.string],
@@ -362,7 +364,8 @@ describe("Moderation Cloud Function", async () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
-        ["e", flaggedNostrEvent.id, "other"],
+        ["p", flaggedNostrEvent.pubkey, "spam"],
+        ["e", flaggedNostrEvent.id, "spam"],
         ["L", "MOD"],
         ["l", "MOD>IH", "MOD", sinon.match.string],
         ["l", "MOD>IL-har", "MOD", sinon.match.string],
@@ -428,7 +431,8 @@ describe("Moderation Cloud Function", async () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
-        ["e", flaggedNostrEvent.id, "other"],
+        ["p", flaggedNostrEvent.pubkey, "spam"],
+        ["e", flaggedNostrEvent.id, "spam"],
         ["L", "MOD"],
         ["l", "MOD>IH", "MOD", sinon.match.string],
         ["l", "MOD>IL-har", "MOD", sinon.match.string],
