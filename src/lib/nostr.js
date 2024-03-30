@@ -111,6 +111,11 @@ export default class Nostr {
 
   static async setTags(moderationNostrEvent, moderatedNostrEvent, moderation) {
     const reportType = this.inferReportType(moderation);
+    moderationNostrEvent.tags.push([
+      "p",
+      moderatedNostrEvent.pubkey,
+      reportType,
+    ]);
     moderationNostrEvent.tags.push(["e", moderatedNostrEvent.id, reportType]);
     moderationNostrEvent.tags.push(["L", "MOD"]);
 
