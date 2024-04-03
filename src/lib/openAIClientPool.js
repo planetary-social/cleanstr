@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import OpenAI from "openai";
 
 const MODERATED_EVENT_KINDS = [
   1, // Kind 1: Short Text Note (free-form text notes)
@@ -14,14 +14,14 @@ export class OpenAIClientPool {
   // Creates one openAI client per key and then round robins between them for
   // each request in a predictable event.id based way
   constructor(keys) {
-    if (!keys.length) throw new Error('Keys array cannot be empty');
+    if (!keys.length) throw new Error("Keys array cannot be empty");
     this.clients = keys.map((key) => new OpenAI({ apiKey: key }));
   }
 
   // Returns a moderation object if the event content is flagged.
   async getModeration(event) {
     if (
-      event.content.trim() === '' ||
+      event.content.trim() === "" ||
       !MODERATED_EVENT_KINDS.includes(event.kind)
     ) {
       return;
@@ -33,14 +33,14 @@ export class OpenAIClientPool {
 
     console.log(
       `Moderation for event ${event.id} with content "${
-        event.content.slice(0, 20) + '...'
+        event.content.slice(0, 20) + "..."
       }": ${JSON.stringify(moderation)}`
     );
 
     const scores = Object.values(moderation.category_scores);
     const maxScore = Math.max(...scores);
 
-    if (moderation.flagged && maxScore >= 0.9) {
+    if (moderation.flagged && maxScore >= 0.985) {
       return moderation;
     }
   }
