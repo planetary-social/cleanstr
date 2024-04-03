@@ -64,6 +64,8 @@ export default class Slack {
     return {
       channel: channelId,
       text,
+      unfurl_media: false,
+      unfurl_links: false,
       blocks: [
         {
           type: "section",
@@ -84,6 +86,22 @@ export default class Slack {
                   text:
                     reportRequest.reporterText ||
                     "No text provided by reporter",
+                },
+              ],
+              border: 0,
+            },
+          ],
+        },
+        {
+          type: "rich_text",
+          block_id: "reportedText",
+          elements: [
+            {
+              type: "rich_text_preformatted",
+              elements: [
+                {
+                  type: "text",
+                  text: reportRequest.reportedEvent.content,
                 },
               ],
               border: 0,
