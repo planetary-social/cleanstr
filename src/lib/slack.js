@@ -83,6 +83,7 @@ export default class Slack {
               elements: [
                 {
                   type: "text",
+                  style: { italic: true },
                   text:
                     reportRequest.reporterText ||
                     "No text provided by reporter",
@@ -93,6 +94,13 @@ export default class Slack {
           ],
         },
         {
+          type: "section",
+          text: {
+            type: "plain_text",
+            text: "Offending text:",
+          },
+        },
+        {
           type: "rich_text",
           block_id: "reportedText",
           elements: [
@@ -101,6 +109,7 @@ export default class Slack {
               elements: [
                 {
                   type: "text",
+                  style: { italic: true },
                   text: reportRequest.reportedEvent.content,
                 },
               ],
