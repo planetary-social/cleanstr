@@ -28,7 +28,14 @@ export default class Slack {
   }
 
   static createSlackMessagePayload(reportRequest) {
-    const text = `New Nostr Event to moderate requested by pubkey \`${reportRequest.reporterPubkey}\``;
+    let text = `New Nostr Event to moderate requested by pubkey \`${reportRequest.reporterPubkey}\``;
+    if (reportRequest.njump) {
+      text = `New Nostr Event to moderate requested by ${reportRequest.njump}`;
+    }
+
+    if (reportRequest.reportedUserNjump) {
+      text += ` reporting an event published by ${reportRequest.reportedUserNjump}`;
+    }
 
     const elements = Object.entries(OPENAI_CATEGORIES).map(
       ([category, categoryData]) => {

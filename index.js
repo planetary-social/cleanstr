@@ -48,6 +48,7 @@ functions.cloudEvent("nostrEventsPubSub", async (cloudEvent) => {
             return;
           }
 
+          await Nostr.maybeFetchNip05(reportRequest);
           await Slack.postManualVerification(reportRequest);
           return;
         }

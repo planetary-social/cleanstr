@@ -103,6 +103,7 @@ describe("Moderation Cloud Function", async () => {
       ],
     });
     sinon.stub(Nostr, "publishModeration");
+    sinon.stub(Nostr, "maybeFetchNip05");
     const cloudEvent = {
       data: {
         message: {
@@ -153,6 +154,7 @@ describe("Moderation Cloud Function", async () => {
       ],
     });
     sinon.stub(Nostr, "publishModeration");
+    sinon.stub(Nostr, "maybeFetchNip05");
     const cloudEvent = {
       data: {
         message: {
