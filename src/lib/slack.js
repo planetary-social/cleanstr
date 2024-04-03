@@ -53,6 +53,7 @@ export default class Slack {
 
     elements.unshift({
       type: "button",
+      style: "danger",
       text: {
         type: "plain_text",
         text: "Skip",
