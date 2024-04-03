@@ -30,26 +30,22 @@ const connectedPromise = ndk.connect();
 export const REPORT_KIND = 1984;
 
 export default class Nostr {
-  static async maybeFetchNip05(reportRequest) {
-    const user = ndk.getUser({ hexpubkey: reportRequest.reporterPubkey });
+  static async updateNjump(reportRequest, hexpubkey, fieldToUpdate) {
+    const user = ndk.getUser({ hexpubkey });
     const profile = await user.fetchProfile();
-
     if (profile?.nip05) {
       const njump = `https://njump.me/${profile.nip05}`;
-      reportRequest.njump = njump;
-      return;
+      reportRequest[fieldToUpdate] = njump;
     }
+  }
 
-    const reportedUser = ndk.getUser({
-      hexpubkey: reportRequest.reportedEvent.pubkey,
-    });
-    const reportedUserProfile = await reportedUser.fetchProfile();
-
-    if (reportedUserProfile?.nip05) {
-      const njump = `https://njump.me/${reportedUserProfile.nip05}`;
-      reportRequest.reportedUserNjump = njump;
-      return;
-    }
+  static async maybeFetchNip05(reportRequest) {
+    await updateNjump(reportRequest, reportRequest.reporterPubkey, "njump");
+    await updateNjump(
+      reportRequest,
+      reportRequest.reportedEvent.pubkey,
+      "reportedUserNjump"
+    );
   }
 
   // Creates a NIP-32 event flagging a Nostr event.
