@@ -48,6 +48,8 @@ describe("Slack", () => {
     expect(slackMessagePayload).to.be.eql({
       channel: "something",
       text: "New Nostr Event to moderate requested by pubkey `npub123`",
+      unfurl_links: false,
+      unfurl_media: false,
       blocks: [
         {
           type: "section",
@@ -57,13 +59,16 @@ describe("Slack", () => {
           },
         },
         {
-          type: "rich_text",
           block_id: "reporterText",
+          type: "rich_text",
           elements: [
             {
               type: "rich_text_preformatted",
               elements: [
                 {
+                  style: {
+                    italic: true,
+                  },
                   text: "No text provided by reporter",
                   type: "text",
                 },
@@ -73,8 +78,34 @@ describe("Slack", () => {
           ],
         },
         {
+          type: "section",
+          text: {
+            type: "plain_text",
+            text: "Offending text:",
+          },
+        },
+        {
+          block_id: "reportedText",
           type: "rich_text",
+          elements: [
+            {
+              border: 0,
+              elements: [
+                {
+                  style: {
+                    italic: true,
+                  },
+                  text: "Foobar",
+                  type: "text",
+                },
+              ],
+              type: "rich_text_preformatted",
+            },
+          ],
+        },
+        {
           block_id: "reportedEvent",
+          type: "rich_text",
           elements: [
             {
               type: "rich_text_preformatted",
