@@ -40,8 +40,12 @@ export default class Nostr {
   }
 
   static async maybeFetchNip05(reportRequest) {
-    await updateNjump(reportRequest, reportRequest.reporterPubkey, "njump");
-    await updateNjump(
+    await this.updateNjump(
+      reportRequest,
+      reportRequest.reporterPubkey,
+      "njump"
+    );
+    await this.updateNjump(
       reportRequest,
       reportRequest.reportedEvent.pubkey,
       "reportedUserNjump"
