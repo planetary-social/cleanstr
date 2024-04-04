@@ -231,6 +231,7 @@ describe("Moderation Cloud Function", async () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
+        ["p", flaggedNostrEvent.pubkey, "other"],
         ["e", flaggedNostrEvent.id, "other"],
         ["L", "MOD"],
         ["l", "MOD>IH", "MOD", sinon.match.string],
@@ -295,6 +296,7 @@ describe("Moderation Cloud Function", async () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
+        ["p", flaggedNostrEvent.pubkey, "other"],
         ["e", flaggedNostrEvent.id, "other"],
         ["L", "MOD"],
         ["l", "MOD>IH", "MOD", sinon.match.string],
@@ -364,6 +366,7 @@ describe("Moderation Cloud Function", async () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
+        ["p", flaggedNostrEvent.pubkey, "other"],
         ["e", flaggedNostrEvent.id, "other"],
         ["L", "MOD"],
         ["l", "MOD>IH", "MOD", sinon.match.string],
@@ -430,6 +433,7 @@ describe("Moderation Cloud Function", async () => {
     sinon.assert.calledWithMatch(Nostr.publishNostrEvent, {
       kind: 1984,
       tags: [
+        ["p", flaggedNostrEvent.pubkey, "other"],
         ["e", flaggedNostrEvent.id, "other"],
         ["L", "MOD"],
         ["l", "MOD>IH", "MOD", sinon.match.string],
