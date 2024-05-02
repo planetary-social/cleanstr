@@ -7,6 +7,7 @@ import OpenAI from "openai";
 import Nostr from "../src/lib/nostr.js";
 import Slack from "../src/lib/slack.js";
 import { Datastore } from "@google-cloud/datastore";
+import DuplicationHandling from "../src/lib/duplicationHandling.js";
 
 import "../index.js";
 
@@ -59,6 +60,7 @@ describe("Moderation Cloud Function", async () => {
     sinon.spy(console, "error");
     sinon.spy(console, "log");
     sinon.stub(Nostr, "publishNostrEvent").returns(Promise.resolve());
+    sinon.stub(Nostr, "updateNjump").returns(Promise.resolve());
     sinon.stub(Slack, "postManualVerification").returns(Promise.resolve());
     sinon.stub(Datastore.prototype, "get").resolves([]);
     sinon.stub(Datastore.prototype, "save").resolves();
@@ -120,6 +122,65 @@ describe("Moderation Cloud Function", async () => {
   });
 
   it("should send to Slack a valid event that is not flagged sent from the reportinator server", async () => {
+    sinon.stub(OpenAI.Moderations.prototype, "create").resolves({
+      results: [
+        {
+          flagged: false,
+          categories: {
+            sexual: false,
+            hate: false,
+            harassment: false,
+            "self-harm": false,
+            "sexual/minors": false,
+            "hate/threatening": false,
+            "violence/graphic": false,
+            "self-harm/intent": false,
+            "self-harm/instructions": false,
+            "harassment/threatening": false,
+            violence: false,
+          },
+          category_scores: {
+            sexual: 0.0008905100985430181,
+            hate: 0.0,
+            harassment: 0.0,
+            "self-harm": 0.000020246614440111443,
+            "sexual/minors": 0.000046280372771434486,
+            "hate/threatening": 0.000006213878805283457,
+            "violence/graphic": 0.000014815827853453811,
+            "self-harm/intent": 0.00004021823042421602,
+            "self-harm/instructions": 0.000009193716323352419,
+            "harassment/threatening": 0.0007776615675538778,
+            violence: 0.00004086320041096769,
+          },
+        },
+      ],
+    });
+    sinon.stub(Nostr, "publishModeration");
+    sinon.stub(Nostr, "maybeFetchNip05");
+    const cloudEvent = {
+      data: {
+        message: {
+          data: Buffer.from(
+            JSON.stringify({
+              reportedEvent: nostrEvent,
+              reporterPubkey:
+                "npub1a8ekuuuwdsrnq68s0vv9rdqxletn2j2s0hwrctqq0wggac3mh4fqth5p88",
+            })
+          ).toString("base64"),
+        },
+      },
+    };
+
+    const nostrEventsPubSub = getFunction("nostrEventsPubSub");
+    await nostrEventsPubSub(cloudEvent);
+
+    sinon.assert.notCalled(Nostr.publishNostrEvent);
+    sinon.assert.called(Slack.postManualVerification);
+  });
+
+  it("should send to Slack a valid event that is not flagged that was already processed sent from the reportinator server", async () => {
+    sinon.stub(DuplicationHandling, "isEventAlreadyProcessed").resolves(true);
+    sinon.stub(Nostr, "isAlreadyFlagged").resolves(false);
     sinon.stub(OpenAI.Moderations.prototype, "create").resolves({
       results: [
         {

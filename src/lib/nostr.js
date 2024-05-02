@@ -31,6 +31,7 @@ export const REPORT_KIND = 1984;
 
 export default class Nostr {
   static async updateNjump(reportRequest, hexpubkey, fieldToUpdate) {
+    await connectedPromise;
     const user = ndk.getUser({ hexpubkey });
     const profile = await user.fetchProfile();
     if (profile?.nip05) {
@@ -61,12 +62,12 @@ export default class Nostr {
     const user = await userPromise;
 
     let moderationEvent;
-    moderationEvent = await Nostr.createReportEvent(
+    moderationEvent = await this.createReportEvent(
       moderatedNostrEvent,
       moderation
     );
 
-    await Nostr.publishNostrEvent(moderationEvent);
+    await this.publishNostrEvent(moderationEvent);
 
     console.log(
       `Published moderation event ${moderationEvent.id} for event ${moderatedNostrEvent.id}`
@@ -135,10 +136,28 @@ export default class Nostr {
 
   static async getReportedNostrEvent(reportNostrEvent) {
     const reportedNostrEventId = reportNostrEvent.tagValue("e");
-    const reportedNostrEvent = await ndk.fetchEvent({
-      ids: [reportedNostrEventId],
+    return await this.getEvent(reportedNostrEventId);
+  }
+
+  static async getEvent(id) {
+    await connectedPromise;
+    const event = await ndk.fetchEvent({
+      ids: [id],
     });
-    return reportedNostrEvent;
+
+    return event;
+  }
+
+  static async isAlreadyFlagged(id) {
+    await connectedPromise;
+    const user = await userPromise;
+    const event = await ndk.fetchEvent({
+      "#e": [id],
+      kinds: [REPORT_KIND],
+      authors: [user.pubkey],
+    });
+
+    return !!event;
   }
 
   static inferReportType(moderation) {

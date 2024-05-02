@@ -23,8 +23,14 @@ functions.cloudEvent("nostrEventsPubSub", async (cloudEvent) => {
 
   await RateLimiting.handleRateLimit(async function () {
     await DuplicationHandling.processIfNotDuplicate(
+      reportRequest.canBeManualVerified(),
       nostrEvent,
-      async (event) => {
+      async (event, onlySlack) => {
+        if (onlySlack) {
+          await Slack.postManualVerification(reportRequest);
+          return;
+        }
+
         let eventToModerate = event;
         let skipMessage = `Nostr Event ${event.id} passed moderation. Skipping`;
 
@@ -43,12 +49,11 @@ functions.cloudEvent("nostrEventsPubSub", async (cloudEvent) => {
         );
 
         if (!moderation) {
-          if (!reportRequest.reporterPubkey) {
+          if (!reportRequest.canBeManualVerified()) {
             console.log(skipMessage);
             return;
           }
 
-          await Nostr.maybeFetchNip05(reportRequest);
           await Slack.postManualVerification(reportRequest);
           return;
         }

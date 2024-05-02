@@ -16,6 +16,8 @@ export default class Slack {
   // Check https://app.slack.com/block-kit-builder
   static async postManualVerification(reportRequest) {
     try {
+      await Nostr.maybeFetchNip05(reportRequest);
+
       const messagePayload = this.createSlackMessagePayload(reportRequest);
       await web.chat.postMessage(messagePayload);
 
