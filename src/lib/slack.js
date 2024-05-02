@@ -1,5 +1,6 @@
 import { WebClient } from "@slack/web-api";
 import OPENAI_CATEGORIES from "./openAICategories.js";
+import Nostr from "./nostr.js";
 
 if (!process.env.SLACK_TOKEN) {
   throw new Error("SLACK_TOKEN environment variable is required");

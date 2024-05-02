@@ -23,6 +23,9 @@ export default class DuplicationHandling {
         console.log(`Event ${event.id} already flagged. Skipping`);
         return;
       }
+      console.log(
+        `Event ${event.id} already seen but not flagged. Processing.`
+      );
 
       // Event was already seen and not flagged but now the user requests manual verification
       onlySlack = true;

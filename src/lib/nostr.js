@@ -151,11 +151,13 @@ export default class Nostr {
   static async isAlreadyFlagged(id) {
     await connectedPromise;
     const user = await userPromise;
+    console.log("Checking if event is already flagged", id);
     const event = await ndk.fetchEvent({
       "#e": [id],
       kinds: [REPORT_KIND],
-      authors: [user.pubkey],
+      authors: [user.hexpubkey],
     });
+    console.log(`Event ${id} already flagged:`, !!event);
 
     return !!event;
   }
