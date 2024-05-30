@@ -13,6 +13,8 @@ if (!process.env.CHANNEL_ID) {
 const token = process.env.SLACK_TOKEN;
 const channelId = process.env.CHANNEL_ID;
 const web = new WebClient(token);
+
+const code = (string) => `\`${string}\``;
 export default class Slack {
   // Check https://app.slack.com/block-kit-builder
   static async postManualVerification(reportRequest) {
@@ -31,11 +33,11 @@ export default class Slack {
   }
 
   static createSlackMessagePayload(reportRequest) {
-    let text = `New Nostr Event to moderate requested by \`${
-      reportRequest.njump || reportRequest.reporterNpub()
-    }\` reporting an event published by \`${
-      reportRequest.reportedUserNjump || reportRequest.reportedNpub()
-    }\``;
+    let text = `New Nostr Event to moderate requested by ${
+      reportRequest.njump || code(reportRequest.reporterNpub())
+    } reporting an event published by ${
+      reportRequest.reportedUserNjump || code(reportRequest.reportedNpub())
+    }`;
 
     const elements = Object.entries(OPENAI_CATEGORIES).map(
       ([category, categoryData]) => {
