@@ -23,7 +23,7 @@ export default class Slack {
       await web.chat.postMessage(messagePayload);
 
       console.log(
-        `Sent event ${reportRequest.reportedEvent.id} to Slack for manual evaluation.`
+        `Sent event ${reportRequest.reportedEvent.nevent()} to Slack for manual evaluation.`
       );
     } catch (error) {
       console.error(error);
@@ -31,14 +31,11 @@ export default class Slack {
   }
 
   static createSlackMessagePayload(reportRequest) {
-    let text = `New Nostr Event to moderate requested by pubkey \`${reportRequest.reporterPubkey}\``;
-    if (reportRequest.njump) {
-      text = `New Nostr Event to moderate requested by ${reportRequest.njump}`;
-    }
-
-    if (reportRequest.reportedUserNjump) {
-      text += ` reporting an event published by ${reportRequest.reportedUserNjump}`;
-    }
+    let text = `New Nostr Event to moderate requested by \`${
+      reportRequest.njump || reportRequest.reporterNpub()
+    }\` reporting an event published by \`${
+      reportRequest.reportedUserNjump || reportRequest.reportedNpub()
+    }\``;
 
     const elements = Object.entries(OPENAI_CATEGORIES).map(
       ([category, categoryData]) => {

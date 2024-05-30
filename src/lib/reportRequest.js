@@ -1,3 +1,4 @@
+import { nip19 } from "nostr-tools";
 export default class ReportRequest {
   constructor(reportedEvent, reporterPubkey, reporterText) {
     this.reportedEvent = reportedEvent;
@@ -19,6 +20,19 @@ export default class ReportRequest {
     }
 
     return new ReportRequest(json, null, null);
+  }
+
+  reporterNpub() {
+    console.log("this.reporterPubkey", this.reporterPubkey);
+    return nip19.npubEncode(this.reporterPubkey);
+  }
+
+  reportedNpub() {
+    return nip19.npubEncode(this.reportedEvent.pubkey);
+  }
+
+  nevent() {
+    return nip19.neventEncode(this.reportedEvent.id);
   }
 
   canBeManualVerified() {

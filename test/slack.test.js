@@ -16,9 +16,11 @@ describe("Slack", () => {
   });
 
   it("createSlackMessagePayload", () => {
+    const pubkey =
+      "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65";
     const nostrEvent = {
       id: "12",
-      pubkey: "34",
+      pubkey,
       created_at: 1673347337,
       kind: 1,
       content: "Foobar",
@@ -35,7 +37,7 @@ describe("Slack", () => {
           data: Buffer.from(
             JSON.stringify({
               reportedEvent: nostrEvent,
-              reporterPubkey: "npub123",
+              reporterPubkey: pubkey,
             })
           ).toString("base64"),
         },
@@ -43,11 +45,12 @@ describe("Slack", () => {
     };
 
     const reportRequest = ReportRequest.fromCloudEvent(cloudEvent);
+    console.log(reportRequest);
     const slackMessagePayload = Slack.createSlackMessagePayload(reportRequest);
 
     expect(slackMessagePayload).to.be.eql({
       channel: "something",
-      text: "New Nostr Event to moderate requested by pubkey `npub123`",
+      text: "New Nostr Event to moderate requested by `npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j` reporting an event published by `npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j`",
       unfurl_links: false,
       unfurl_media: false,
       blocks: [
@@ -55,7 +58,7 @@ describe("Slack", () => {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "New Nostr Event to moderate requested by pubkey `npub123`",
+            text: "New Nostr Event to moderate requested by `npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j` reporting an event published by `npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j`",
           },
         },
         {
@@ -113,7 +116,7 @@ describe("Slack", () => {
                 {
                   type: "text",
                   style: { code: true },
-                  text: '{\n  "id": "12",\n  "pubkey": "34",\n  "created_at": 1673347337,\n  "kind": 1,\n  "content": "Foobar",\n  "tags": [\n    [\n      "e",\n      "56"\n    ],\n    [\n      "p",\n      "78"\n    ]\n  ],\n  "sig": "91"\n}',
+                  text: '{\n  "id": "12",\n  "pubkey": "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",\n  "created_at": 1673347337,\n  "kind": 1,\n  "content": "Foobar",\n  "tags": [\n    [\n      "e",\n      "56"\n    ],\n    [\n      "p",\n      "78"\n    ]\n  ],\n  "sig": "91"\n}',
                 },
               ],
               border: 0,
@@ -130,7 +133,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "Skip",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "skip",
             },
             {
@@ -139,7 +143,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "hate",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "hate",
             },
             {
@@ -148,7 +153,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "hate/threatening",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "hate/threatening",
             },
             {
@@ -157,7 +163,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "harassment",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "harassment",
             },
             {
@@ -166,7 +173,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "harassment/threatening",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "harassment/threatening",
             },
             {
@@ -175,7 +183,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "self-harm",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "self-harm",
             },
             {
@@ -184,7 +193,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "self-harm/intent",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "self-harm/intent",
             },
             {
@@ -193,7 +203,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "self-harm/instructions",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "self-harm/instructions",
             },
             {
@@ -202,7 +213,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "sexual",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "sexual",
             },
             {
@@ -211,7 +223,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "sexual/minors",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "sexual/minors",
             },
             {
@@ -220,7 +233,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "violence",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "violence",
             },
             {
@@ -229,7 +243,8 @@ describe("Slack", () => {
                 type: "plain_text",
                 text: "violence/graphic",
               },
-              value: "npub123",
+              value:
+                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
               action_id: "violence/graphic",
             },
           ],
