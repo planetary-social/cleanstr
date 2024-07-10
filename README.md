@@ -1,9 +1,9 @@
 [![Node.js CI](https://github.com/planetary-social/cleanstr/actions/workflows/node.js.yml/badge.svg)](https://github.com/planetary-social/cleanstr/actions/workflows/node.js.yml)
 [![codecov](https://codecov.io/gh/planetary-social/cleanstr/graph/badge.svg?token=QN61WNS6D5)](https://codecov.io/gh/planetary-social/cleanstr)
 
-# Cleanster - Nostr Content Moderation with OpenAI
+# Cleanstr - Nostr Content Moderation with OpenAI
 
-Cleanster is a Google Cloud Function node application designed to filter and moderate content from Nostr using OpenAI's moderation service. With the surge in user-generated content, maintaining the quality and safety of shared data is paramount. Cleanster seamlessly takes in a pubsub feed of Nostr content, checks it, and generates Nostr events tagging the results.
+Cleanstr is a Google Cloud Function node application designed to filter and moderate content from Nostr using OpenAI's moderation service. With the surge in user-generated content, maintaining the quality and safety of shared data is paramount. Cleanstr seamlessly takes in a pubsub feed of Nostr content, checks it, and generates Nostr events tagging the results.
 
 ## Table of Contents
 
@@ -26,8 +26,8 @@ Cleanster is a Google Cloud Function node application designed to filter and mod
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/planetary-social/cleanster.git
-   cd cleanster
+   git clone https://github.com/planetary-social/cleanstr.git
+   cd cleanstr
    ```
 
 2. **Prerequisites**
@@ -45,19 +45,19 @@ Cleanster is a Google Cloud Function node application designed to filter and mod
 
     - **Prepare Your Environment**: Ensure the Google Cloud CLI (`gcloud`) is installed and configured with your account.
     - **Set Environment Variables**: `NOSTR_PRIVATE_KEY` for the reporting account private key, and `OPENAI_API_CSV` for your OpenAI API keys.
-    - **Deploy the Function**: Use `pnpm run deploy` to upload Cleanster to Google Cloud.
-    - **Post-Deployment**: Cleanster starts processing Nostr events and publishes moderation reports via NIP-56 on `wss://relay.nos.social`. You can change this relay to your own.
+    - **Deploy the Function**: Use `pnpm run deploy` to upload Cleanstr to Google Cloud.
+    - **Post-Deployment**: Cleanstr starts processing Nostr events and publishes moderation reports via NIP-56 on `wss://relay.nos.social`. You can change this relay to your own.
 
 3. **Integration with our Nostr Relay**
 
    - If you don't want to host your own deployment you can use our relay. Add `wss://relay.nos.social` to your Nostr client's relay list.
-   - Content flagged by Cleanster is managed by this relay and marked as kind 1984 for prompt handling.
-   - Following the [Reportinator](https://njump.me/nprofile1qqs2m4gep0jxwdmg23kp3dt9mgaxnyjp7rsx5a0zm0qr7xrx85dhkfcpzemhxue69uhhyetvv9ujumn0wvh8xmmrd9skcl8vqu6) bot in your Nostr client is essential for proper integration with Cleanster's moderation reports.
+   - Content flagged by Cleanstr is managed by this relay and marked as kind 1984 for prompt handling.
+   - Following the [Reportinator](https://njump.me/nprofile1qqs2m4gep0jxwdmg23kp3dt9mgaxnyjp7rsx5a0zm0qr7xrx85dhkfcpzemhxue69uhhyetvv9ujumn0wvh8xmmrd9skcl8vqu6) bot in your Nostr client is essential for proper integration with Cleanstr's moderation reports.
    - Your client should properly process kind 1984 in a similar way that https://nos.social does. 
 
 ## Support
 
-For any issues or suggestions, please [open an issue](https://github.com/your-repo/cleanster/issues) or contact our support team at support@nos.social.
+For any issues or suggestions, please [open an issue](https://github.com/your-repo/cleanstr/issues) or contact our support team at support@nos.social.
 
 ## Contributing
 
