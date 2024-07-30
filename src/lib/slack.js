@@ -14,6 +14,17 @@ const token = process.env.SLACK_TOKEN;
 const channelId = process.env.CHANNEL_ID;
 const web = new WebClient(token);
 
+// https://github.com/nostr-protocol/nips/blob/master/56.md
+const nip56_report_type = [
+  "nudity",
+  "malware",
+  "profanity",
+  "illegal",
+  "spam",
+  "impersonation",
+  "other",
+];
+
 const code = (string) => `\`${string}\``;
 export default class Slack {
   // Check https://app.slack.com/block-kit-builder
@@ -39,19 +50,17 @@ export default class Slack {
       reportRequest.reportedUserNjump || code(reportRequest.reportedNpub())
     }`;
 
-    const elements = Object.entries(OPENAI_CATEGORIES).map(
-      ([category, categoryData]) => {
-        return {
-          type: "button",
-          text: {
-            type: "plain_text",
-            text: category,
-          },
-          value: reportRequest.reporterPubkey,
-          action_id: category,
-        };
-      }
-    );
+    const elements = nip56_report_type.map((category) => {
+      return {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: category,
+        },
+        value: reportRequest.reporterPubkey,
+        action_id: category,
+      };
+    });
 
     elements.unshift({
       type: "button",

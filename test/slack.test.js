@@ -127,125 +127,85 @@ describe("Slack", () => {
           type: "actions",
           elements: [
             {
-              type: "button",
+              action_id: "skip",
               style: "danger",
               text: {
-                type: "plain_text",
                 text: "Skip",
+                type: "plain_text",
               },
+              type: "button",
               value:
                 "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "skip",
             },
             {
-              type: "button",
+              action_id: "nudity",
               text: {
+                text: "nudity",
                 type: "plain_text",
-                text: "hate",
               },
+              type: "button",
               value:
                 "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "hate",
             },
             {
-              type: "button",
+              action_id: "malware",
               text: {
+                text: "malware",
                 type: "plain_text",
-                text: "hate/threatening",
               },
+              type: "button",
               value:
                 "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "hate/threatening",
             },
             {
-              type: "button",
+              action_id: "profanity",
               text: {
+                text: "profanity",
                 type: "plain_text",
-                text: "harassment",
               },
+              type: "button",
               value:
                 "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "harassment",
             },
             {
-              type: "button",
+              action_id: "illegal",
               text: {
+                text: "illegal",
                 type: "plain_text",
-                text: "harassment/threatening",
               },
+              type: "button",
               value:
                 "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "harassment/threatening",
             },
             {
-              type: "button",
+              action_id: "spam",
               text: {
+                text: "spam",
                 type: "plain_text",
-                text: "self-harm",
               },
+              type: "button",
               value:
                 "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "self-harm",
             },
             {
-              type: "button",
+              action_id: "impersonation",
               text: {
+                text: "impersonation",
                 type: "plain_text",
-                text: "self-harm/intent",
               },
+              type: "button",
               value:
                 "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "self-harm/intent",
             },
             {
-              type: "button",
+              action_id: "other",
               text: {
+                text: "other",
                 type: "plain_text",
-                text: "self-harm/instructions",
               },
+              type: "button",
               value:
                 "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "self-harm/instructions",
-            },
-            {
-              type: "button",
-              text: {
-                type: "plain_text",
-                text: "sexual",
-              },
-              value:
-                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "sexual",
-            },
-            {
-              type: "button",
-              text: {
-                type: "plain_text",
-                text: "sexual/minors",
-              },
-              value:
-                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "sexual/minors",
-            },
-            {
-              type: "button",
-              text: {
-                type: "plain_text",
-                text: "violence",
-              },
-              value:
-                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "violence",
-            },
-            {
-              type: "button",
-              text: {
-                type: "plain_text",
-                text: "violence/graphic",
-              },
-              value:
-                "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65",
-              action_id: "violence/graphic",
             },
           ],
         },
