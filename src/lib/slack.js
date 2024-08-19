@@ -36,7 +36,7 @@ export default class Slack {
       await web.chat.postMessage(messagePayload);
 
       console.log(
-        `Sent event ${reportRequest.reportedEvent.nevent()} to Slack for manual evaluation.`
+        `Sent event ${reportRequest.nevent()} to Slack for manual evaluation.`
       );
     } catch (error) {
       console.error(error);
