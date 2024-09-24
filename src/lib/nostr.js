@@ -2,6 +2,7 @@ import NDK, { NDKEvent, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
 import { validateEvent, verifySignature } from "nostr-tools";
 import OPENAI_CATEGORIES from "./openAICategories.js";
 import { WebSocket } from "ws";
+import { nip19 } from "nostr-tools";
 
 if (!process.env.NOSTR_PRIVATE_KEY) {
   throw new Error("NOSTR_PRIVATE_KEY environment variable is required");
@@ -31,13 +32,21 @@ export const REPORT_KIND = 1984;
 
 export default class Nostr {
   static async updateNjump(reportRequest, hexpubkey, fieldToUpdate) {
+    const profile = await this.fetchProfile(hexpubkey);
+
+    const njumpPath = profile?.nip05
+      ? profile.nip05
+      : nip19.npubEncode(hexpubkey);
+    console.log("njumpPath", njumpPath, hexpubkey);
+
+    const njump = `https://njump.me/${njumpPath}`;
+    reportRequest[fieldToUpdate] = njump;
+  }
+
+  static async fetchProfile(hexpubkey) {
     await connectedPromise;
     const user = ndk.getUser({ hexpubkey });
-    const profile = await user.fetchProfile();
-    if (profile?.nip05) {
-      const njump = `https://njump.me/${profile.nip05}`;
-      reportRequest[fieldToUpdate] = njump;
-    }
+    return await user.fetchProfile();
   }
 
   static async maybeFetchNip05(reportRequest) {

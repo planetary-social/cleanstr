@@ -53,7 +53,7 @@ Cleanstr is a Google Cloud Function node application designed to filter and mode
    - If you don't want to host your own deployment you can use our relay. Add `wss://relay.nos.social` to your Nostr client's relay list.
    - Content flagged by Cleanstr is managed by this relay and marked as kind 1984 for prompt handling.
    - Following the [Reportinator](https://njump.me/nprofile1qqs2m4gep0jxwdmg23kp3dt9mgaxnyjp7rsx5a0zm0qr7xrx85dhkfcpzemhxue69uhhyetvv9ujumn0wvh8xmmrd9skcl8vqu6) bot in your Nostr client is essential for proper integration with Cleanstr's moderation reports.
-   - Your client should properly process kind 1984 in a similar way that https://nos.social does. 
+   - Your client should properly process kind 1984 in a similar way that https://nos.social does.
 
 ## Support
 
