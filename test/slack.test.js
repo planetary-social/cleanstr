@@ -3,19 +3,21 @@ import sinon from "sinon";
 import Slack from "../src/lib/slack.js";
 import ReportRequest from "../src/lib/reportRequest.js";
 import fs from "fs";
+import Nostr from "../src/lib/nostr.js";
 
 describe("Slack", () => {
   beforeEach(async () => {
     sinon.spy(console, "error");
     sinon.spy(console, "log");
     sinon.stub(Slack, "postManualVerification").returns(Promise.resolve());
+    sinon.stub(Nostr, "fetchProfile").returns(Promise.resolve());
   });
 
   afterEach(async () => {
     sinon.restore();
   });
 
-  it("createSlackMessagePayload", () => {
+  it("createSlackMessagePayload", async () => {
     const pubkey =
       "56d4b3d6310fadb7294b7f041aab469c5ffc8991b1b1b331981b96a246f6ae65";
     const nostrEvent = {
@@ -45,12 +47,12 @@ describe("Slack", () => {
     };
 
     const reportRequest = ReportRequest.fromCloudEvent(cloudEvent);
-    console.log(reportRequest);
+    await Nostr.maybeFetchNip05(reportRequest);
     const slackMessagePayload = Slack.createSlackMessagePayload(reportRequest);
 
     expect(slackMessagePayload).to.be.eql({
       channel: "something",
-      text: "New Nostr Event to moderate requested by `npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j` reporting an event published by `npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j`",
+      text: "New Nostr Event to moderate requested by https://njump.me/npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j reporting an event published by https://njump.me/npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j",
       unfurl_links: false,
       unfurl_media: false,
       blocks: [
@@ -58,7 +60,7 @@ describe("Slack", () => {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "New Nostr Event to moderate requested by `npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j` reporting an event published by `npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j`",
+            text: "New Nostr Event to moderate requested by https://njump.me/npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j reporting an event published by https://njump.me/npub12m2t8433p7kmw22t0uzp426xn30lezv3kxcmxvvcrwt2y3hk4ejsvre68j",
           },
         },
         {

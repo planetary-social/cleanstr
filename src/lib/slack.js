@@ -1,5 +1,4 @@
 import { WebClient } from "@slack/web-api";
-import OPENAI_CATEGORIES from "./openAICategories.js";
 import Nostr from "./nostr.js";
 
 if (!process.env.SLACK_TOKEN) {
@@ -44,11 +43,7 @@ export default class Slack {
   }
 
   static createSlackMessagePayload(reportRequest) {
-    let text = `New Nostr Event to moderate requested by ${
-      reportRequest.njump || code(reportRequest.reporterNpub())
-    } reporting an event published by ${
-      reportRequest.reportedUserNjump || code(reportRequest.reportedNpub())
-    }`;
+    let text = `New Nostr Event to moderate requested by ${reportRequest.njump} reporting an event published by ${reportRequest.reportedUserNjump}`;
 
     const elements = nip56_report_type.map((category) => {
       return {

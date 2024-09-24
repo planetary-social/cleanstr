@@ -60,7 +60,7 @@ describe("Moderation Cloud Function", async () => {
     sinon.spy(console, "error");
     sinon.spy(console, "log");
     sinon.stub(Nostr, "publishNostrEvent").returns(Promise.resolve());
-    sinon.stub(Nostr, "updateNjump").returns(Promise.resolve());
+    sinon.stub(Nostr, "fetchProfile").returns(Promise.resolve());
     sinon.stub(Slack, "postManualVerification").returns(Promise.resolve());
     sinon.stub(Datastore.prototype, "get").resolves([]);
     sinon.stub(Datastore.prototype, "save").resolves();
